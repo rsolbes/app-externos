@@ -1,0 +1,446 @@
+// ===== VARIABLES =====
+$primary-color: #0066ff;
+$primary-dark: #0052cc;
+$cta-color: #fbbf24;
+$cta-dark: #f59e0b;
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$white: #ffffff;
+$header-bg: rgba(0, 102, 255, 0.95);
+$header-scrolled: rgba(0, 102, 255, 0.98);
+
+// ===== MIXINS =====
+@mixin smooth-transition($properties...) {
+  transition-property: $properties;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ===== HEADER PRINCIPAL =====
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: $header-bg;
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  @include smooth-transition(background-color, box-shadow, border-color);
+
+  &.scrolled {
+    background: $header-scrolled;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+// ===== MARCA/LOGO =====
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  @include smooth-transition(transform);
+
+  &:hover {
+    transform: translateY(-2px);
+
+    .logo-wrapper {
+      transform: scale(1.05);
+    }
+
+    .logo-glow {
+      opacity: 1;
+    }
+  }
+}
+
+.logo-wrapper {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  @include smooth-transition(transform);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.logo-glow {
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(135deg, $white, $cta-color);
+  border-radius: 50%;
+  filter: blur(12px);
+  opacity: 0;
+  @include smooth-transition(opacity);
+  z-index: 1;
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: $white;
+  letter-spacing: -0.02em;
+}
+
+// ===== NAVEGACIÓN DESKTOP =====
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba($white, 0.85);
+  text-decoration: none;
+  position: relative;
+  @include smooth-transition(all);
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.85;
+    @include smooth-transition(opacity, transform);
+  }
+
+  // Hover effect
+  &:hover {
+    background: rgba($white, 0.15);
+    color: $white;
+
+    .nav-icon {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+  }
+
+  // Active state
+  &.active {
+    background: rgba($white, 0.2);
+    color: $white;
+
+    .nav-icon {
+      opacity: 1;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 18px;
+      right: 18px;
+      height: 3px;
+      background: $white;
+      border-radius: 2px;
+      box-shadow: 0 2px 8px rgba($white, 0.4);
+    }
+  }
+}
+
+// ===== BOTÓN CTA =====
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  margin-left: 8px;
+  border-radius: 12px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, $cta-color 0%, $cta-dark 100%);
+  color: $text-primary;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba($cta-color, 0.3);
+  position: relative;
+  overflow: hidden;
+  @include smooth-transition(all);
+
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    z-index: 2;
+  }
+
+  span {
+    position: relative;
+    z-index: 2;
+  }
+
+  // Efecto de brillo
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba($cta-color, 0.4);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+}
+
+// ===== BOTÓN MENÚ MÓVIL =====
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  z-index: 1001;
+
+  .hamburger-line {
+    width: 24px;
+    height: 2px;
+    background: $white;
+    border-radius: 2px;
+    @include smooth-transition(all);
+    transform-origin: center;
+
+    &:not(:last-child) {
+      margin-bottom: 5px;
+    }
+  }
+
+  // Estado activo (X)
+  &.active {
+    .hamburger-line {
+      &:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+      }
+
+      &:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+      }
+
+      &:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+      }
+    }
+  }
+
+  &:hover .hamburger-line {
+    background: $white;
+  }
+}
+
+// ===== MENÚ MÓVIL =====
+.mobile-menu {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  visibility: hidden;
+  opacity: 0;
+  @include smooth-transition(visibility, opacity);
+  z-index: 999;
+
+  &.open {
+    visibility: visible;
+    opacity: 1;
+
+    .mobile-nav {
+      transform: translateX(0);
+    }
+
+    .mobile-menu-backdrop {
+      opacity: 1;
+    }
+  }
+}
+
+.mobile-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  @include smooth-transition(opacity);
+}
+
+.mobile-nav {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 85vw);
+  background: $white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0;
+  transform: translateX(100%);
+  @include smooth-transition(transform);
+  overflow-y: auto;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-secondary;
+  text-decoration: none;
+  position: relative;
+  @include smooth-transition(all);
+
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    opacity: 0.7;
+    @include smooth-transition(opacity);
+  }
+
+  span {
+    flex: 1;
+  }
+
+  .arrow-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transform: translateX(-8px);
+    @include smooth-transition(opacity, transform);
+  }
+
+  &:hover,
+  &:active {
+    background: rgba($primary-color, 0.05);
+    color: $primary-color;
+
+    .nav-icon {
+      opacity: 1;
+    }
+
+    .arrow-icon {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  &.active {
+    background: linear-gradient(90deg, rgba($primary-color, 0.1) 0%, transparent 100%);
+    color: $primary-color;
+    border-left: 4px solid $primary-color;
+
+    .nav-icon {
+      opacity: 1;
+    }
+  }
+
+  &.cta {
+    margin: 1rem 1.5rem 0;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, $cta-color 0%, $cta-dark 100%);
+    color: $text-primary;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba($cta-color, 0.3);
+
+    .nav-icon {
+      opacity: 1;
+    }
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba($cta-color, 0.4);
+    }
+  }
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .header-inner {
+    height: 60px;
+  }
+
+  .mobile-menu {
+    top: 60px;
+  }
+
+  .brand-text {
+    font-size: 1.125rem;
+  }
+
+  .logo-wrapper {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu,
+  .mobile-menu-btn {
+    display: none !important;
+  }
+}
+
+// ===== ANIMACIONES =====
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

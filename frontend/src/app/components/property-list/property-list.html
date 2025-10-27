@@ -1,0 +1,13 @@
+<div *ngIf="!loading; else loadingTpl">
+  <div *ngIf="properties?.length; else emptyTpl" class="grid">
+    <app-property-card *ngFor="let p of properties" [data]="p"></app-property-card>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Cargando…</div>
+</ng-template>
+
+<ng-template #emptyTpl>
+  <div class="empty">No hay propiedades para mostrar.</div>
+</ng-template>

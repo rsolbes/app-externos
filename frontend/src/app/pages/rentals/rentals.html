@@ -1,0 +1,9 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>En alquiler</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+<app-property-list [properties]="(properties$ | async) ?? []"></app-property-list>
+</ion-content>

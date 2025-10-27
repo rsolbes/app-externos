@@ -1,0 +1,134 @@
+// Variables de color (basadas en tus capturas de pantalla)
+:host {
+  --primary-color: #2563eb;  // Azul principal
+  --secondary-color: #f1f5f9; // Gris claro para botón secundario
+  --secondary-text: #334155;
+  --secondary-hover: #e2e8f0;
+  --bg-light: #ffffff;
+  --text-light: #ffffff;
+  --border-color: #e2e8f0;
+  --input-bg: #f8fafc;
+  --input-text: #0f172a;
+  --input-placeholder: #94a3b8;
+  --advanced-text: var(--primary-color);
+}
+
+// Contenedor principal (de tu archivo)
+.search-filter-container {
+  background-color: var(--bg-light);
+  padding: 20px;
+  margin: 16px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: 'Inter', sans-serif;
+}
+
+// Grid de filtros (de tu archivo)
+.filters {
+  display: grid;
+  // Se adapta automáticamente, con columnas de mínimo 160px
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  align-items: center;
+}
+
+// Estilo de Inputs y Selects (de tu archivo, adaptado)
+.filter-input,
+.filter-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  box-sizing: border-box; 
+
+  &::placeholder {
+    color: var(--input-placeholder);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+}
+
+// Estilo base de botón
+.btn-primary,
+.btn-secondary,
+.btn-advanced {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s, color 0.2s;
+  box-sizing: border-box;
+}
+
+// Botón de Buscar
+.btn-primary {
+  background-color: var(--primary-color); // Azul
+  color: var(--text-light);
+  &:hover {
+    background-color: color-mix(in srgb, var(--primary-color), black 10%);
+  }
+}
+
+// Botón de Limpiar
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: var(--secondary-text);
+  border: 1px solid var(--border-color);
+  &:hover {
+    background-color: var(--secondary-hover);
+  }
+}
+
+// Botón de Búsqueda Avanzada
+.btn-advanced {
+  background-color: var(--bg-light);
+  color: var(--advanced-text);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  &:hover {
+    background-color: var(--secondary-color);
+  }
+
+  .chevron {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease-in-out;
+    &.rotated {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+// Contenedor de filtros avanzados
+.advanced-filters {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

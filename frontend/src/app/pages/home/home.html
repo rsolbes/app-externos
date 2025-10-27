@@ -1,0 +1,46 @@
+<ion-content>
+  <!-- Sección principal -->  
+  <section class="hero-section">
+    <div class="container">
+      <!-- Barra de búsqueda -->
+      <div class="search-wrapper">
+        <app-search-filter (search)="onSearch($event)"></app-search-filter>
+      </div>
+    </div>
+    
+    <!-- Decoración de fondo -->
+    <div class="hero-decoration">
+      <div class="decoration-circle circle-1"></div>
+      <div class="decoration-circle circle-2"></div>
+      <div class="decoration-circle circle-3"></div>
+    </div>
+  </section>
+
+  <!-- Sección de resultados -->
+  <section class="results-section">
+    <div class="container">
+      <!-- Lista de propiedades con animación -->
+      <app-property-list 
+        [properties]="properties" 
+        [loading]="loading"
+        class="fade-in-up">
+      </app-property-list>
+
+      <!-- Estado vacío -->
+      @if (!loading && properties.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h3 class="empty-title">No encontramos propiedades</h3>
+          <p class="empty-text">
+            Intenta ajustar tus filtros de búsqueda
+          </p>
+          <button class="btn-reset" (click)="loadProperties()">
+            Ver todas
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <app-whatsapp-float></app-whatsapp-float>
+</ion-content>
