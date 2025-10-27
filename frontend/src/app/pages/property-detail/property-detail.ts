@@ -1,17 +1,17 @@
-// property-detail.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Property } from '../../components/models/property.model';
 import { PropertyService } from '../../services/property.service';
 
 @Component({
   selector: 'app-property-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyPipe, DecimalPipe],
+  imports: [CommonModule, RouterModule, CurrencyPipe],
   templateUrl: './property-detail.html',
   styleUrls: ['./property-detail.scss']
 })
+
 export class PropertyDetailPage implements OnInit {
   data: Property | null = null;
   loading = true;
@@ -24,45 +24,15 @@ export class PropertyDetailPage implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id) {
+      // Incrementar contador de visitas
+      this.api.incrementViews(id).subscribe();
+      
       this.api.get(id).subscribe({
         next: (property) => {
           if (property) {
             this.data = property;
             this.loading = false;
-            
-            // Inicializar array de imágenes
-            this.images = [];
-            
-            // Agregar imagen principal desde el campo 'Imagen' de la BD
-            if (property.Imagen) {
-              const imageSource = this.convertImageToUrl(property.Imagen);
-              if (imageSource) {
-                this.images.push(imageSource);
-              }
-            }
-            
-            // 🔮 FUTURO: Cuando tengas múltiples imágenes, descomenta una de estas opciones:
-            
-            // OPCIÓN 1: Si tienes un array de imágenes en el modelo
-            // if (property.imagenes && Array.isArray(property.imagenes)) {
-            //   this.images = [...this.images, ...property.imagenes];
-            // }
-            
-            // OPCIÓN 2: Si tienes campos separados (Imagen_2, Imagen_3, etc.)
-            // if (property.Imagen_2) {
-            //   const img2 = this.convertImageToUrl(property.Imagen_2);
-            //   if (img2) this.images.push(img2);
-            // }
-            // if (property.Imagen_3) {
-            //   const img3 = this.convertImageToUrl(property.Imagen_3);
-            //   if (img3) this.images.push(img3);
-            // }
-            
-            // OPCIÓN 3: Si tienes una tabla relacionada de imágenes
-            // Necesitarías hacer otra llamada al API:
-            // this.api.getPropertyImages(id).subscribe(imgs => {
-            //   this.images = [...this.images, ...imgs.map(img => this.convertImageToUrl(img))];
-            // });
+            this.processImages(property);
           }
         },
         error: () => {
@@ -73,9 +43,63 @@ export class PropertyDetailPage implements OnInit {
     }
   }
 
-  // Convertir imagen de base64 a URL utilizable
-  private convertImageToUrl(imagen: string | null): string | null {
-    if (!imagen) return null;
+  private processImages(property: Property): void {
+    this.images = [];
+
+    // PRIORIDAD 1: Imágenes de la tabla propiedades_imagenes
+    if (property.imagenes && property.imagenes.length > 0) {
+      this.images = property.imagenes.map(img => this.processImageUrl(img.url));
+    }
+    
+    // PRIORIDAD 2: Imagen legacy (campo Imagen en tabla propiedades)
+    // Solo si no hay imágenes en la tabla propiedades_imagenes
+    if (this.images.length === 0 && property.Imagen) {
+      const legacyImage = this.convertBase64ToUrl(property.Imagen);
+      if (legacyImage) {
+        this.images.push(legacyImage);
+      }
+    }
+
+    // Si no hay ninguna imagen, usar placeholder
+    if (this.images.length === 0) {
+      this.images.push('assets/images/no-image-placeholder.jpg');
+    }
+  }
+
+  private processImageUrl(url: string): string {
+    // Si ya es una URL completa, devolverla tal cual
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    // Si ya tiene el prefijo data:image, devolverla tal cual
+    if (url.startsWith('data:')) {
+      return url;
+    }
+
+    // Si parece ser base64, convertir
+    if (this.isBase64(url)) {
+      return this.convertBase64ToUrl(url);
+    }
+
+    // Si es una ruta relativa, construir URL completa
+    // Asumiendo que tienes un servidor de archivos
+    return `${this.getImageBaseUrl()}/${url}`;
+  }
+
+  private getImageBaseUrl(): string {
+    // Ajusta según tu configuración de servidor
+    return 'http://localhost:3000/uploads';
+  }
+
+  private isBase64(str: string): boolean {
+    // Verificar si parece ser base64
+    const base64Regex = /^[A-Za-z0-9+/=]+$/;
+    return base64Regex.test(str) && str.length % 4 === 0;
+  }
+
+  private convertBase64ToUrl(imagen: string): string {
+    if (!imagen) return '';
 
     // Si ya es una URL completa
     if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
@@ -87,12 +111,11 @@ export class PropertyDetailPage implements OnInit {
       return imagen;
     }
 
-    // Si es base64 puro (caso más común desde Access)
+    // Si es base64 puro
     const imageType = this.detectImageType(imagen);
     return `data:image/${imageType};base64,${imagen}`;
   }
 
-  // Detectar tipo de imagen desde base64
   private detectImageType(base64: string): string {
     const signatures: { [key: string]: string } = {
       '/9j/': 'jpeg',
@@ -124,23 +147,25 @@ export class PropertyDetailPage implements OnInit {
       return 'Renta';
     }
     
-    // Fallback al método anterior
+    // Fallback
     return this.data.precio ? 'Venta' : this.data.precio_alquiler ? 'Renta' : 'Consultar';
   }
 
-  nextImage() {
+  nextImage(): void {
     if (this.images.length > 1) {
       this.currentImageIndex = (this.currentImageIndex + 1) % this.images.length;
     }
   }
 
-  prevImage() {
+  prevImage(): void {
     if (this.images.length > 1) {
-      this.currentImageIndex = this.currentImageIndex === 0 ? this.images.length - 1 : this.currentImageIndex - 1;
+      this.currentImageIndex = this.currentImageIndex === 0 
+        ? this.images.length - 1 
+        : this.currentImageIndex - 1;
     }
   }
 
-  verEnGoogleMaps() {
+  verEnGoogleMaps(): void {
     if (this.data && this.data.lat && this.data.lng) {
       const lat = parseFloat(this.data.lat);
       const lng = parseFloat(this.data.lng);
@@ -155,16 +180,16 @@ export class PropertyDetailPage implements OnInit {
     }
   }
 
-  contactarWhatsApp() {
+  contactarWhatsApp(): void {
     if (this.data) {
       const mensaje = `Hola, estoy interesado en la propiedad: ${this.data.titulo}`;
-      // CAMBIA ESTE NÚMERO POR EL TUYO
-      const url = `https://wa.me/521XXXXXXXXXX?text=${encodeURIComponent(mensaje)}`;
+      // CAMBIA ESTE NÚMERO POR EL TUYO (formato: 521 + 10 dígitos)
+      const url = `https://wa.me/5218112345678?text=${encodeURIComponent(mensaje)}`;
       window.open(url, '_blank');
     }
   }
 
-  compartir() {
+  compartir(): void {
     if (navigator.share && this.data) {
       navigator.share({
         title: this.data.titulo || 'Propiedad',

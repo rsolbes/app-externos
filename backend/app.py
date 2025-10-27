@@ -339,7 +339,7 @@ def update_property(id):
             data.get('valor_administracion'), data.get('habitaciones'), data.get('alcobas'), data.get('banos'), 
             data.get('banos_medios'), data.get('estacionamientos'), data.get('anio_construccion'), data.get('piso'), 
             data.get('m2_terreno'), data.get('m2_construccion'), data.get('m2_privada'), data.get('direccion'), 
-            data.get('codigo_postal'), data.get('lat'), data.get('lng'), data.get('registro_publico'), 
+            data.get('codigo_ postal'), data.get('lat'), data.get('lng'), data.get('registro_publico'), 
             data.get('convenio_url'), data.get('convenio_validado'),
             data.get('tipo_negocio_id'), data.get('tipo_propiedad_id'), data.get('estado_publicacion_id'), 
             data.get('captado_por_agente_id'), data.get('moneda_id'), data.get('frecuencia_alquiler_id'), 
@@ -375,6 +375,35 @@ def delete_property(id):
     finally:
         if conn:
             conn.close()
+
+# --- ESTA ES LA RUTA NUEVA QUE AÑADÍ ---
+@app.route('/api/propiedades/<int:id>/view', methods=['POST'])
+def increment_view(id):
+    conn = None
+    try:
+        conn = get_db_connection() 
+        cur = conn.cursor()
+        
+        # --- ESTA ES LA LÍNEA CORREGIDA ---
+        # Usa 'visitas' (con 'i') en lugar de 'vistas' (con 's')
+        cur.execute(
+            "UPDATE propiedades SET visitas = COALESCE(visitas, 0) + 1 WHERE id = %s", 
+            (id,)
+        )
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({'message': f'Visitas incrementadas para propiedad {id}'}), 200
+    
+    except Exception as e:
+        # Imprime el error en tu terminal de backend para depuración
+        print(f"Error incrementando vistas: {e}") 
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+# --- FIN DE LA RUTA AÑADIDA ---
 
 # --- Endpoints de Imágenes ---
 @app.route('/api/propiedades/<int:propiedad_id>/imagenes', methods=['POST'])

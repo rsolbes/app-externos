@@ -1,42 +1,27 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { Property } from '../models/property.model';
-import { PropertyCardComponent } from '../property-card/property-card'; // Importamos la tarjeta
+import { PropertyCardComponent } from '../property-card/property-card';
 
 @Component({
   selector: 'app-property-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, IonicModule, CurrencyPipe, PropertyCardComponent], // Añadimos la tarjeta
+  imports: [CommonModule, RouterModule, IonicModule, PropertyCardComponent],
   template: `
     <div class="list-container">
       
-      <!-- 
-        Comprobamos si 'loading' es falso 
-        y si 'properties' existe y tiene items 
-      -->
       @if (!loading && properties && properties.length > 0) {
-        
-        <!-- 
-          Usamos 'app-property-card' 
-          y le pasamos la propiedad [data]="prop"
-        -->
         @for (prop of properties; track prop.id) {
           <app-property-card [data]="prop"></app-property-card>
         }
-
       } @else if (!loading && (!properties || properties.length === 0)) {
-        
-        <!-- Este es el mensaje que ves ahora -->
         <div class="empty-state">
           <ion-icon name="home-outline"></ion-icon>
           <p>No hay propiedades para mostrar.</p>
         </div>
-
       } @else if (loading) {
-        
-        <!-- Esto se muestra mientras 'loading' es true -->
         <div class="empty-state">
           <ion-spinner name="crescent"></ion-spinner>
           <p>Cargando propiedades...</p>
@@ -44,7 +29,6 @@ import { PropertyCardComponent } from '../property-card/property-card'; // Impor
       }
     </div>
   `,
-  // Estilos (los mismos de antes)
   styles: [
     `
       .list-container {
@@ -75,12 +59,6 @@ import { PropertyCardComponent } from '../property-card/property-card'; // Impor
   ]
 })
 export class PropertyListComponent {
-  // @Input() permite que 'home.ts' le pase los datos
   @Input() properties: Property[] = [];
-  
-  // ******
-  // ESTA LÍNEA ARREGLA EL ERROR de binding:
-  // Declara que 'loading' es una propiedad que este componente puede recibir.
-  // ******
   @Input() loading: boolean = true;
 }
