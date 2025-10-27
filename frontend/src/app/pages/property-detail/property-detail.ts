@@ -3,6 +3,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Property } from '../../components/models/property.model';
 import { PropertyService } from '../../services/property.service';
+import { Injectable } from '@angular/core';
+
 
 @Component({
   selector: 'app-property-detail',
@@ -24,8 +26,10 @@ export class PropertyDetailPage implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id) {
+      // --- ESTA ES LA LÍNEA QUE FALTABA ---
       // Incrementar contador de visitas
       this.api.incrementViews(id).subscribe();
+      // --- FIN DE LA CORRECCIÓN ---
       
       this.api.get(id).subscribe({
         next: (property) => {
@@ -204,3 +208,4 @@ export class PropertyDetailPage implements OnInit {
     }
   }
 }
+

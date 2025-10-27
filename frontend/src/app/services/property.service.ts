@@ -46,10 +46,12 @@ export class PropertyService {
   // Obtiene una propiedad específica por su ID (VERSIÓN CORREGIDA Y EFICIENTE)
   get(id: number): Observable<Property | null> {
     // Es mucho más eficiente pedir solo 1 propiedad al backend
-    return this.http.get<any>(`${this.base}/${id}`).pipe(
+    // Corregimos el tipo de lo que esperamos (Property) y el map
+    return this.http.get<Property>(`${this.base}/${id}`).pipe(
       map(response => {
-        if (response && response.property) {
-          return this.mapProperty(response.property);
+        // La respuesta ES la propiedad, no está dentro de "response.property"
+        if (response) {
+          return this.mapProperty(response);
         }
         return null;
       }),
@@ -132,3 +134,4 @@ export class PropertyService {
     );
   }
 }
+
