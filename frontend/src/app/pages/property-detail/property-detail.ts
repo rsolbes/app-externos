@@ -1,19 +1,17 @@
+// property-detail.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { Property } from '../../components/models/property.model';
 import { PropertyService } from '../../services/property.service';
-import { Injectable } from '@angular/core';
-
 
 @Component({
   selector: 'app-property-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyPipe],
+  imports: [CommonModule, RouterModule, CurrencyPipe, DecimalPipe],
   templateUrl: './property-detail.html',
   styleUrls: ['./property-detail.scss']
 })
-
 export class PropertyDetailPage implements OnInit {
   data: Property | null = null;
   loading = true;
@@ -26,17 +24,20 @@ export class PropertyDetailPage implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (id) {
-      // --- ESTA ES LA LÍNEA QUE FALTABA ---
       // Incrementar contador de visitas
       this.api.incrementViews(id).subscribe();
-      // --- FIN DE LA CORRECCIÓN ---
       
       this.api.get(id).subscribe({
         next: (property) => {
           if (property) {
             this.data = property;
             this.loading = false;
+            // --- LÓGICA DE IMAGEN CORREGIDA ---
             this.processImages(property);
+          } else {
+            // Si la propiedad es null (ej. no encontrada)
+            this.data = null;
+            this.loading = false;
           }
         },
         error: () => {
@@ -47,93 +48,22 @@ export class PropertyDetailPage implements OnInit {
     }
   }
 
+  // --- FUNCIÓN DE IMAGEN CORREGIDA ---
   private processImages(property: Property): void {
     this.images = [];
 
-    // PRIORIDAD 1: Imágenes de la tabla propiedades_imagenes
+    // 1. Usar el array 'imagenes' de la propiedad
     if (property.imagenes && property.imagenes.length > 0) {
-      this.images = property.imagenes.map(img => this.processImageUrl(img.url));
+      // Mapea el array de objetos de imagen a un array de URLs
+      this.images = property.imagenes
+        .sort((a, b) => a.orden - b.orden) // Asegura el orden
+        .map(img => img.url); // Extrae solo la URL
     }
     
-    // PRIORIDAD 2: Imagen legacy (campo Imagen en tabla propiedades)
-    // Solo si no hay imágenes en la tabla propiedades_imagenes
-    if (this.images.length === 0 && property.Imagen) {
-      const legacyImage = this.convertBase64ToUrl(property.Imagen);
-      if (legacyImage) {
-        this.images.push(legacyImage);
-      }
-    }
-
-    // Si no hay ninguna imagen, usar placeholder
+    // 2. Si no hay ninguna imagen, usar placeholder
     if (this.images.length === 0) {
-      this.images.push('assets/images/no-image-placeholder.jpg');
+      this.images.push('assets/placeholder-property.jpg'); // Asegúrate que esta imagen exista
     }
-  }
-
-  private processImageUrl(url: string): string {
-    // Si ya es una URL completa, devolverla tal cual
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      return url;
-    }
-
-    // Si ya tiene el prefijo data:image, devolverla tal cual
-    if (url.startsWith('data:')) {
-      return url;
-    }
-
-    // Si parece ser base64, convertir
-    if (this.isBase64(url)) {
-      return this.convertBase64ToUrl(url);
-    }
-
-    // Si es una ruta relativa, construir URL completa
-    // Asumiendo que tienes un servidor de archivos
-    return `${this.getImageBaseUrl()}/${url}`;
-  }
-
-  private getImageBaseUrl(): string {
-    // Ajusta según tu configuración de servidor
-    return 'http://localhost:3000/uploads';
-  }
-
-  private isBase64(str: string): boolean {
-    // Verificar si parece ser base64
-    const base64Regex = /^[A-Za-z0-9+/=]+$/;
-    return base64Regex.test(str) && str.length % 4 === 0;
-  }
-
-  private convertBase64ToUrl(imagen: string): string {
-    if (!imagen) return '';
-
-    // Si ya es una URL completa
-    if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
-      return imagen;
-    }
-
-    // Si ya tiene el prefijo data:image
-    if (imagen.startsWith('data:')) {
-      return imagen;
-    }
-
-    // Si es base64 puro
-    const imageType = this.detectImageType(imagen);
-    return `data:image/${imageType};base64,${imagen}`;
-  }
-
-  private detectImageType(base64: string): string {
-    const signatures: { [key: string]: string } = {
-      '/9j/': 'jpeg',
-      'iVBORw0KGgo': 'png',
-      'R0lGODlh': 'gif',
-      'UklGR': 'webp'
-    };
-
-    for (const [signature, type] of Object.entries(signatures)) {
-      if (base64.startsWith(signature)) {
-        return type;
-      }
-    }
-    return 'jpeg'; // Por defecto
   }
 
   get displayPrice(): number | null {
@@ -177,10 +107,11 @@ export class PropertyDetailPage implements OnInit {
         const url = `https://www.google.com/maps?q=${lat},${lng}`;
         window.open(url, '_blank');
       } else {
-        alert("Coordenadas inválidas.");
+        // No uses alert, usa console.warn
+        console.warn("Coordenadas inválidas.");
       }
     } else {
-      alert("No se han proporcionado las coordenadas de la propiedad.");
+      console.warn("No se han proporcionado las coordenadas de la propiedad.");
     }
   }
 
@@ -202,9 +133,10 @@ export class PropertyDetailPage implements OnInit {
       }).catch(err => console.log('Error al compartir:', err));
     } else {
       // Fallback: copiar al portapapeles
+      // (Evita usar 'alert' si es posible)
       navigator.clipboard.writeText(window.location.href)
-        .then(() => alert('Enlace copiado al portapapeles'))
-        .catch(() => alert('No se pudo copiar el enlace'));
+        .then(() => console.log('Enlace copiado al portapapeles'))
+        .catch(() => console.error('No se pudo copiar el enlace'));
     }
   }
 }

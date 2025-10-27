@@ -18,7 +18,7 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
   // Estado para animaciones e imagen
   imageLoaded: boolean = false;
   favoriteAnimation: boolean = false;
-  imageSrc: string = ''; // ← Agregada esta propiedad que faltaba
+  imageSrc: string = ''; // ← Propiedad para la URL de la imagen
 
   ngOnInit() {
     this.imageSrc = this.getImageSource();
@@ -31,46 +31,40 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
       };
       img.onerror = () => {
         console.warn('Error cargando imagen para propiedad:', this.data?.id);
-        this.imageLoaded = true;
+        this.imageLoaded = true; // Marcar como cargada incluso si hay error (para quitar skeleton)
+        this.imageSrc = 'assets/placeholder-property.jpg'; // Usar placeholder en caso de error
       };
       img.src = this.imageSrc;
     } else {
+      this.imageSrc = 'assets/placeholder-property.jpg';
       this.imageLoaded = true;
     }
   }
 
-  // Convertir imagen de base64/blob a URL utilizable
+  // --- LÓGICA DE IMAGEN CORREGIDA ---
   getImageSource(): string {
-    // Usar el campo 'Imagen' de tu base de datos Access
-    const imagen = this.data?.Imagen || this.data?.['Imagen'];
+    // 1. Revisa si existe el array 'imagenes' y si tiene elementos
+    if (this.data?.imagenes && this.data.imagenes.length > 0) {
+      
+      // 2. Busca la imagen marcada como 'es_principal'
+      const principalImage = this.data.imagenes.find(img => img.es_principal);
+      if (principalImage && principalImage.url) {
+        return principalImage.url;
+      }
+      
+      // 3. Si no hay principal, usa la primera imagen del array
+      if (this.data.imagenes[0] && this.data.imagenes[0].url) {
+        return this.data.imagenes[0].url;
+      }
+    }
     
-    if (!imagen) {
-      return 'assets/placeholder-property.jpg';
-    }
-
-    // Si ya es una URL completa (http/https)
-    if (typeof imagen === 'string' && 
-        (imagen.startsWith('http://') || imagen.startsWith('https://'))) {
-      return imagen;
-    }
-
-    // Si es base64 puro (sin prefijo data:image) - caso más común desde Access
-    if (typeof imagen === 'string' && !imagen.startsWith('data:')) {
-      // Intentar detectar el tipo de imagen o usar jpeg por defecto
-      const imageType = this.detectImageType(imagen);
-      return `data:image/${imageType};base64,${imagen}`;
-    }
-
-    // Si ya tiene el prefijo data:image
-    if (typeof imagen === 'string' && imagen.startsWith('data:')) {
-      return imagen;
-    }
-
+    // 4. Si no hay nada, usa el placeholder
     return 'assets/placeholder-property.jpg';
   }
 
-  // Detectar tipo de imagen desde base64
+  // Detectar tipo de imagen (ya no es necesario si las URLs son directas)
   private detectImageType(base64: string): string {
+    // ... esta función puede quedar por si acaso, pero la lógica de arriba ya no la usa
     const signatures: { [key: string]: string } = {
       '/9j/': 'jpeg',
       'iVBORw0KGgo': 'png',
@@ -88,7 +82,8 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
 
   waUrl(p: Property): string {
     const message = encodeURIComponent(`Hola, me interesa la propiedad: ${p.titulo}`);
-    return `https://wa.me/521XXXXXXXXXX?text=${message}`;
+    // Asegúrate de cambiar este número
+    return `https://wa.me/5218330000000?text=${message}`;
   }
 
   price(p: Property): number | null {
