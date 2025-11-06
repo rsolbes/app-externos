@@ -8,7 +8,7 @@ import { PropertyService } from '../../services/property.service';
 @Component({
   selector: 'app-property-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, CurrencyPipe, DecimalPipe],
+  imports: [CommonModule, RouterModule, CurrencyPipe],
   templateUrl: './property-detail.html',
   styleUrls: ['./property-detail.scss']
 })
@@ -26,7 +26,7 @@ export class PropertyDetailPage implements OnInit {
     if (id) {
       // Incrementar contador de visitas
       this.api.incrementViews(id).subscribe();
-      
+
       this.api.get(id).subscribe({
         next: (property) => {
           if (property) {
@@ -59,7 +59,7 @@ export class PropertyDetailPage implements OnInit {
         .sort((a, b) => a.orden - b.orden) // Asegura el orden
         .map(img => img.url); // Extrae solo la URL
     }
-    
+
     // 2. Si no hay ninguna imagen, usar placeholder
     if (this.images.length === 0) {
       this.images.push('assets/placeholder-property.jpg'); // Asegúrate que esta imagen exista
@@ -73,14 +73,14 @@ export class PropertyDetailPage implements OnInit {
 
   get tipoNegocio(): string {
     if (!this.data) return '';
-    
+
     // Usar tipo_negocio_id: 1=VENTA, 2=RENTA
     if (this.data.tipo_negocio_id === 1 || this.data.tipo_negocio_id === '1') {
       return 'Venta';
     } else if (this.data.tipo_negocio_id === 2 || this.data.tipo_negocio_id === '2') {
       return 'Renta';
     }
-    
+
     // Fallback
     return this.data.precio ? 'Venta' : this.data.precio_alquiler ? 'Renta' : 'Consultar';
   }
@@ -93,8 +93,8 @@ export class PropertyDetailPage implements OnInit {
 
   prevImage(): void {
     if (this.images.length > 1) {
-      this.currentImageIndex = this.currentImageIndex === 0 
-        ? this.images.length - 1 
+      this.currentImageIndex = this.currentImageIndex === 0
+        ? this.images.length - 1
         : this.currentImageIndex - 1;
     }
   }

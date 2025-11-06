@@ -3,18 +3,20 @@ import { Component, Input, inject, OnInit, OnDestroy } from '@angular/core';
 import { Property } from '../models/property.model';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { IonicModule } from '@ionic/angular'; // <-- 1. IMPORTA IONICMODULE
 
 @Component({
   selector: 'app-property-card',
   templateUrl: './property-card.html',
   styleUrls: ['./property-card.scss'],
   standalone: true,
-  imports: [RouterModule, CommonModule, CurrencyPipe, DecimalPipe]
+  // 2. AÑADE IONICMODULE A LOS IMPORTS
+  imports: [RouterModule, CommonModule, CurrencyPipe, DecimalPipe, IonicModule]
 })
 export class PropertyCardComponent implements OnInit, OnDestroy {
   @Input() data!: Property;
   private router = inject(Router);
-  
+
   // Estado para animaciones e imagen
   imageLoaded: boolean = false;
   favoriteAnimation: boolean = false;
@@ -22,7 +24,7 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.imageSrc = this.getImageSource();
-    
+
     // Pre-cargar la imagen
     if (this.imageSrc) {
       const img = new Image();
@@ -45,19 +47,19 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
   getImageSource(): string {
     // 1. Revisa si existe el array 'imagenes' y si tiene elementos
     if (this.data?.imagenes && this.data.imagenes.length > 0) {
-      
+
       // 2. Busca la imagen marcada como 'es_principal'
       const principalImage = this.data.imagenes.find(img => img.es_principal);
       if (principalImage && principalImage.url) {
         return principalImage.url;
       }
-      
+
       // 3. Si no hay principal, usa la primera imagen del array
       if (this.data.imagenes[0] && this.data.imagenes[0].url) {
         return this.data.imagenes[0].url;
       }
     }
-    
+
     // 4. Si no hay nada, usa el placeholder
     return 'assets/placeholder-property.jpg';
   }
@@ -133,7 +135,7 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
     }
 
     localStorage.setItem('property_favorites', JSON.stringify(favorites));
-    
+
     // Activar animación
     this.favoriteAnimation = true;
     setTimeout(() => this.favoriteAnimation = false, 600);

@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+// Importamos HttpParams
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map, of, catchError } from 'rxjs';
 import { Property } from '../components/models/property.model';
 
+// Esta interfaz se mantiene igual
 export interface SearchParams {
   q?: string;
   minPrice?: number;
@@ -18,7 +20,17 @@ export class PropertyService {
   private http = inject(HttpClient);
   private base = 'http://localhost:5000/api/propiedades';
 
-  // Mapea la respuesta de la API a un formato de propiedad que tu aplicación entiende
+  // --- IDs DE TU BASE DE DATOS ---
+  private ID_TIPO_VENTA = '1';
+  private ID_TIPO_RENTA = '2';
+  private ID_TIPO_TRASPASO = '3';
+
+  // --- CAMBIO: IDs a excluir ---
+  // Unimos "En Borrador" (2), "Vendida" (3) y "Rentada" (4)
+  private ESTADOS_EXCLUIDOS = '2,3,4';
+  // -------------------------------
+
+  // Mapea la respuesta de la API... (sin cambios)
   private mapProperty(item: any): Property {
     return {
       ...item,
@@ -27,9 +39,10 @@ export class PropertyService {
     };
   }
 
-  // Devuelve la lista de propiedades desde la API
-  list(): Observable<Property[]> {
-    return this.http.get<any>(this.base).pipe(
+  // --- NUEVA FUNCIÓN PRIVADA ---
+  // Función genérica para obtener propiedades filtradas... (sin cambios)
+  private listFiltered(params: HttpParams): Observable<Property[]> {
+    return this.http.get<any>(this.base, { params }).pipe(
       map(response => {
         if (response && response.properties && Array.isArray(response.properties)) {
           return response.properties.map((item: any) => this.mapProperty(item));
@@ -38,12 +51,23 @@ export class PropertyService {
       }),
       catchError(err => {
         console.error('Error al conectar con el backend', err);
-        return of([]); // En caso de error, devuelve un array vacío
+        return of([]);
       })
     );
   }
 
-  // Obtiene una propiedad específica por su ID (VERSIÓN CORREGIDA Y EFICIENTE)
+  // --- MODIFICADO ---
+  // Devuelve la lista de propiedades para "Comprar"
+  list(): Observable<Property[]> {
+    const params = new HttpParams()
+      .set('tipo_negocio_id', this.ID_TIPO_VENTA)
+      // Usamos 'estado_publicacion_id__not_in' para excluir la lista
+      .set('estado_publicacion_id__not_in', this.ESTADOS_EXCLUIDOS);
+
+    return this.listFiltered(params);
+  }
+
+  // Obtiene una propiedad específica por su ID... (sin cambios)
   get(id: number): Observable<Property | null> {
     // Es mucho más eficiente pedir solo 1 propiedad al backend
     // Corregimos el tipo de lo que esperamos (Property) y el map
@@ -62,8 +86,7 @@ export class PropertyService {
     );
   }
 
-  // --- MÉTODO FALTANTE (CORRECCIÓN) ---
-  // Incrementa las vistas de una propiedad
+  // Incrementa las vistas de una propiedad... (sin cambios)
   incrementViews(id: number): Observable<any> {
     // Esta llamada fallará si tu backend no tiene esta ruta.
     // Necesitas crear una ruta como: POST /api/propiedades/:id/view
@@ -77,12 +100,16 @@ export class PropertyService {
   }
 
 
-  // --- FUNCIÓN DE BÚSQUEDA (CORREGIDA) ---
+  // --- FUNCIÓN DE BÚSQUEDA (sin cambios en la lógica) ---
+  // Esta función llama a this.list(), que AHORA ya viene filtrado
+  // por el backend (solo "Venta" y sin "Borrador/Vendido/Rentado").
+  // Luego, aplica los filtros de la búsqueda (precio, habs, etc.)
+  // en el frontend sobre esa lista ya filtrada.
   search(params: SearchParams): Observable<Property[]> {
     return this.list().pipe(
       map(properties => {
         return properties.filter(p => {
-          
+
           // --- Filtro de Texto (q) ---
           if (params.q) {
             const query = params.q.toLowerCase();
@@ -127,11 +154,33 @@ export class PropertyService {
     );
   }
 
+  // --- MODIFICADO ---
   // Lista las propiedades en alquiler
   listRentals(): Observable<Property[]> {
-    return this.list().pipe(
-      map(rows => rows.filter(p => p.precio_alquiler != null && p.precio_alquiler > 0))
-    );
+    const params = new HttpParams()
+      .set('tipo_negocio_id', this.ID_TIPO_RENTA)
+      // Usamos 'estado_publicacion_id__not_in' para excluir la lista
+      .set('estado_publicacion_id__not_in', this.ESTADOS_EXCLUIDOS);
+
+    return this.listFiltered(params);
+  }
+
+  // --- MODIFICADO (es la nueva función que creamos) ---
+  // Lista las propiedades en traspaso
+  listTraspasos(): Observable<Property[]> {
+    const params = new HttpParams()
+      .set('tipo_negocio_id', this.ID_TIPO_TRASPASO)
+      // Usamos 'estado_publicacion_id__not_in' para excluir la lista
+      .set('estado_publicacion_id__not_in', this.ESTADOS_EXCLUIDOS);
+
+    return this.listFiltered(params);
+  }
+
+  listAllPublic(): Observable<Property[]> {
+    const params = new HttpParams()
+      // NO filtramos por tipo_negocio_id
+      .set('estado_publicacion_id__not_in', this.ESTADOS_EXCLUIDOS);
+
+    return this.listFiltered(params);
   }
 }
-

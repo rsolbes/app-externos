@@ -5,5 +5,9 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-<app-property-list [properties]="(properties$ | async) ?? []"></app-property-list>
+<app-property-list
+    [properties]="properties"
+    [loading]="loading">
+  </app-property-list>
+
 </ion-content>
