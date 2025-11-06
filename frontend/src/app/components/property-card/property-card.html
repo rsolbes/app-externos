@@ -24,9 +24,14 @@
 
     <!-- Badge de tipo de propiedad -->
     <span *ngIf="data.tipo_negocio_id"
-          class="tag"
-          [class.rent]="data.tipo_negocio_id === 2 || data.tipo_negocio_id === '2'">
-      {{ (data.tipo_negocio_id === 1 || data.tipo_negocio_id === '1') ? 'VENTA' : 'RENTA' }}
+      class="tag"
+      [class.rent]="data.tipo_negocio_id === 2 || data.tipo_negocio_id === '2'"
+      [class.traspaso]="data.tipo_negocio_id === 3 || data.tipo_negocio_id === '3'">
+      {{
+        (data.tipo_negocio_id === 1 || data.tipo_negocio_id === '1') ? 'VENTA' :
+        (data.tipo_negocio_id === 2 || data.tipo_negocio_id === '2') ? 'RENTA' :
+        'TRASPASO'
+      }}
     </span>
 
     <!-- ⭐ BOTÓN DE FAVORITOS - AQUÍ ESTÁ EL CAMBIO IMPORTANTE -->
