@@ -1,31 +1,33 @@
-// property-card.ts
+// property-card.ts - CON DEBUG Y LOGGING
 import { Component, Input, inject, OnInit, OnDestroy } from '@angular/core';
 import { Property } from '../models/property.model';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
-import { IonicModule } from '@ionic/angular'; // <-- 1. IMPORTA IONICMODULE
+import { IonicModule } from '@ionic/angular';
+import { FavoritesService } from '../../services/favorites.service';
 
 @Component({
   selector: 'app-property-card',
   templateUrl: './property-card.html',
   styleUrls: ['./property-card.scss'],
   standalone: true,
-  // 2. AÑADE IONICMODULE A LOS IMPORTS
   imports: [RouterModule, CommonModule, CurrencyPipe, DecimalPipe, IonicModule]
 })
 export class PropertyCardComponent implements OnInit, OnDestroy {
   @Input() data!: Property;
-  private router = inject(Router);
 
-  // Estado para animaciones e imagen
+  private router = inject(Router);
+  private favoritesService = inject(FavoritesService);
+
   imageLoaded: boolean = false;
   favoriteAnimation: boolean = false;
-  imageSrc: string = ''; // ← Propiedad para la URL de la imagen
+  imageSrc: string = '';
 
   ngOnInit() {
+    console.log('PropertyCard initialized with data:', this.data);
+
     this.imageSrc = this.getImageSource();
 
-    // Pre-cargar la imagen
     if (this.imageSrc) {
       const img = new Image();
       img.onload = () => {
@@ -33,8 +35,8 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
       };
       img.onerror = () => {
         console.warn('Error cargando imagen para propiedad:', this.data?.id);
-        this.imageLoaded = true; // Marcar como cargada incluso si hay error (para quitar skeleton)
-        this.imageSrc = 'assets/placeholder-property.jpg'; // Usar placeholder en caso de error
+        this.imageLoaded = true;
+        this.imageSrc = 'assets/placeholder-property.jpg';
       };
       img.src = this.imageSrc;
     } else {
@@ -43,48 +45,21 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- LÓGICA DE IMAGEN CORREGIDA ---
   getImageSource(): string {
-    // 1. Revisa si existe el array 'imagenes' y si tiene elementos
     if (this.data?.imagenes && this.data.imagenes.length > 0) {
-
-      // 2. Busca la imagen marcada como 'es_principal'
       const principalImage = this.data.imagenes.find(img => img.es_principal);
       if (principalImage && principalImage.url) {
         return principalImage.url;
       }
-
-      // 3. Si no hay principal, usa la primera imagen del array
       if (this.data.imagenes[0] && this.data.imagenes[0].url) {
         return this.data.imagenes[0].url;
       }
     }
-
-    // 4. Si no hay nada, usa el placeholder
     return 'assets/placeholder-property.jpg';
-  }
-
-  // Detectar tipo de imagen (ya no es necesario si las URLs son directas)
-  private detectImageType(base64: string): string {
-    // ... esta función puede quedar por si acaso, pero la lógica de arriba ya no la usa
-    const signatures: { [key: string]: string } = {
-      '/9j/': 'jpeg',
-      'iVBORw0KGgo': 'png',
-      'R0lGODlh': 'gif',
-      'UklGR': 'webp'
-    };
-
-    for (const [signature, type] of Object.entries(signatures)) {
-      if (base64.startsWith(signature)) {
-        return type;
-      }
-    }
-    return 'jpeg'; // Por defecto
   }
 
   waUrl(p: Property): string {
     const message = encodeURIComponent(`Hola, me interesa la propiedad: ${p.titulo}`);
-    // Asegúrate de cambiar este número
     return `https://wa.me/5218330000000?text=${message}`;
   }
 
@@ -120,21 +95,19 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ===== SISTEMA DE FAVORITOS =====
+  // ===== FAVORITOS CON DEBUG =====
   toggleFavorite(event: MouseEvent): void {
     event.stopPropagation();
-    if (!this.data || !this.data.id) return;
+    console.log('toggleFavorite clicked for property:', this.data?.id);
 
-    const favorites = this.getFavorites();
-    const index = favorites.indexOf(this.data.id.toString());
-
-    if (index > -1) {
-      favorites.splice(index, 1);
-    } else {
-      favorites.push(this.data.id.toString());
+    if (!this.data || !this.data.id) {
+      console.warn('No data or id available');
+      return;
     }
 
-    localStorage.setItem('property_favorites', JSON.stringify(favorites));
+    // Usa el servicio centralizado
+    this.favoritesService.toggle(this.data.id);
+    console.log('Favorite toggled. Is now favorite?', this.isFavorite());
 
     // Activar animación
     this.favoriteAnimation = true;
@@ -142,22 +115,18 @@ export class PropertyCardComponent implements OnInit, OnDestroy {
   }
 
   isFavorite(): boolean {
-    if (!this.data || !this.data.id) return false;
-    const favorites = this.getFavorites();
-    return favorites.includes(this.data.id.toString());
+    if (!this.data || !this.data.id) {
+      return false;
+    }
+    const result = this.favoritesService.isFav(this.data.id);
+    console.log('isFavorite check for', this.data.id, ':', result);
+    return result;
   }
 
-  private getFavorites(): string[] {
-    const stored = localStorage.getItem('property_favorites');
-    return stored ? JSON.parse(stored) : [];
-  }
-
-  // Helpers
   hasFeatures(): boolean {
     return !!(this.data?.habitaciones || this.data?.m2_construccion);
   }
 
-  // Limpiar URLs de objetos cuando se destruya el componente
   ngOnDestroy(): void {
     if (this.imageSrc && this.imageSrc.startsWith('blob:')) {
       URL.revokeObjectURL(this.imageSrc);

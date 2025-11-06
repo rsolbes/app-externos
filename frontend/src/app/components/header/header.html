@@ -1,3 +1,4 @@
+<!-- header.html - ACTUALIZADO -->
 <header class="site-header" [class.scrolled]="isScrolled">
   <div class="container header-inner">
     <a routerLink="/" class="brand" (click)="closeMobileMenu()">
@@ -9,6 +10,7 @@
     </a>
 
     <nav class="nav desktop-nav">
+      <!-- Comprar -->
       <a routerLink="/"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{exact:true}"
@@ -20,6 +22,7 @@
         <span>Comprar</span>
       </a>
 
+      <!-- Alquilar -->
       <a routerLink="/rentals"
          routerLinkActive="active"
          class="nav-link">
@@ -30,22 +33,26 @@
         <span>Alquilar</span>
       </a>
 
-      <a routerLink="/favorites"
+      <!-- Traspasar - AHORA CON ESTILO NORMAL -->
+      <a routerLink="/traspasos"
          routerLinkActive="active"
          class="nav-link">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M7 10v12M15 10v12M3 6h18l-1 12H4L3 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Traspasar</span>
+      </a>
+
+      <!-- Favoritos - AHORA EN ROJO -->
+      <a routerLink="/favorites"
+         routerLinkActive="active"
+         class="nav-link nav-link-favorites">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span>Favoritos</span>
-      </a>
-
-      <a routerLink="/traspasos" routerLinkActive="active" class="btn-cta nav-link">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-          <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>Traspasar</span>
       </a>
     </nav>
 
@@ -60,10 +67,12 @@
     </button>
   </div>
 
+  <!-- MENÚ MÓVIL -->
   <div class="mobile-menu" [class.open]="isMobileMenuOpen">
     <div class="mobile-menu-backdrop" (click)="closeMobileMenu()"></div>
 
     <nav class="mobile-nav">
+      <!-- Comprar -->
       <a routerLink="/"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{exact:true}"
@@ -79,6 +88,7 @@
         </svg>
       </a>
 
+      <!-- Alquilar -->
       <a routerLink="/rentals"
          routerLinkActive="active"
          class="mobile-nav-link"
@@ -93,29 +103,31 @@
         </svg>
       </a>
 
-      <a routerLink="/favorites"
+      <!-- Traspasar -->
+      <a routerLink="/traspasos"
          routerLinkActive="active"
          class="mobile-nav-link"
+         (click)="closeMobileMenu()">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M7 10v12M15 10v12M3 6h18l-1 12H4L3 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span>Traspasar</span>
+        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <!-- Favoritos - EN ROJO -->
+      <a routerLink="/favorites"
+         routerLinkActive="active"
+         class="mobile-nav-link mobile-nav-link-favorites"
          (click)="closeMobileMenu()">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span>Favoritos</span>
-        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none">
-          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-
-      <a routerLink="/traspasos"
-         routerLinkActive="active"
-         class="mobile-nav-link cta"
-         (click)="closeMobileMenu()">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-          <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>Traspasar Propiedad</span>
         <svg class="arrow-icon" viewBox="0 0 24 24" fill="none">
           <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
