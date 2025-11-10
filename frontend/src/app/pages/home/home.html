@@ -1,61 +1,13 @@
 <ion-content>
-  <!-- Sección Hero con el buscador espectacular -->
-  <section class="hero-section">
-    <div class="container">
-      <!-- Barra de búsqueda premium -->
-      <div class="search-wrapper">
-        <app-search-filter 
-          [totalProperties]="totalProperties"
-          (search)="onSearch($event)"
-          (reset)="loadProperties()">
-        </app-search-filter>
-      </div>
-    </div>
-    
-    <!-- Decoración de fondo animada -->
-    <div class="hero-decoration">
-      <div class="decoration-circle circle-1"></div>
-      <div class="decoration-circle circle-2"></div>
-      <div class="decoration-circle circle-3"></div>
-    </div>
-  </section>
+  <app-search-filter 
+    (search)="onSearch($event)" 
+    (reset)="onReset()"
+    [totalProperties]="properties.length">
+  </app-search-filter>
 
-  <!-- Sección de resultados -->
-  <section class="results-section">
-    <div class="container">
-      
-      <!-- Indicador de resultados -->
-      @if (!loading && properties.length > 0) {
-        <div class="results-info">
-          <span class="results-count">
-            {{ properties.length }} {{ properties.length === 1 ? 'Propiedad' : 'Propiedades' }} Encontrada{{ properties.length === 1 ? '' : 's' }}
-          </span>
-        </div>
-      }
+  <app-property-list 
+    [properties]="properties" 
+    [loading]="loading">
+  </app-property-list>
 
-      <!-- Lista de propiedades con animación -->
-      <app-property-list 
-        [properties]="properties" 
-        [loading]="loading"
-        class="fade-in-up">
-      </app-property-list>
-
-      <!-- Estado vacío mejorado -->
-      @if (!loading && properties.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <h3 class="empty-title">No encontramos propiedades</h3>
-          <p class="empty-text">
-            Intenta ajustar tus filtros de búsqueda o explora todas nuestras propiedades disponibles
-          </p>
-          <button class="btn-reset" (click)="loadProperties()">
-            Ver Todas las Propiedades
-          </button>
-        </div>
-      }
-    </div>
-  </section>
-
-  <!-- WhatsApp flotante -->
-  <app-whatsapp-float></app-whatsapp-float>
 </ion-content>

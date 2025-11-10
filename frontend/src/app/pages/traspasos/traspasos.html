@@ -1,20 +1,20 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Traspasos</ion-title> </ion-toolbar>
-</ion-header>
+
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Traspasos</ion-title> </ion-toolbar>
+      <ion-title size="large">Traspasos</ion-title>
+    </ion-toolbar>
   </ion-header>
 
-  <app-property-list
-    [properties]="properties"
+  <app-search-filter 
+    (search)="onSearch($event)" 
+    (reset)="onReset()"
+    [totalProperties]="properties.length">
+  </app-search-filter>
+  <app-property-list 
+    [properties]="properties" 
     [loading]="loading">
   </app-property-list>
-
+  
 </ion-content>

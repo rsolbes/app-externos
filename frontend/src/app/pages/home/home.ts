@@ -1,67 +1,70 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { RouterModule } from '@angular/router';
-
-import { SearchFilterComponent } from '../../components/search-filter/search-filter';
-import { PropertyListComponent } from '../../components/property-list/property-list';
-import { FloatingWhatsappComponent } from '../../components/floating-whatsap/floating-whatsapp.component';
-
-import { PropertyService, SearchParams } from '../../services/property.service';
 import { Property } from '../../components/models/property.model';
+import { PropertyListComponent } from '../../components/property-list/property-list';
+import { PropertyService } from '../../services/property.service';
+import { SearchFilterComponent, SearchParams } from '../../components/search-filter/search-filter';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
-    IonicModule, 
-    CommonModule, 
-    RouterModule,
-    SearchFilterComponent, 
+    CommonModule,
+    IonicModule,
     PropertyListComponent,
-    FloatingWhatsappComponent
+    SearchFilterComponent,
   ],
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })
 export class HomePage {
   private api = inject(PropertyService);
+
   properties: Property[] = [];
+  private allProperties: Property[] = []; // Cache para resetear
   loading = true;
-  totalProperties = 0;
+
+  // ID para Venta
+  private readonly TIPO_NEGOCIO_ID = '1';
 
   ngOnInit() {
-    this.loadProperties();
+    this.loadInitialData();
   }
 
-  loadProperties() {
-    this.api.list().subscribe({
-      next: rows => { 
-        this.properties = rows; 
-        this.totalProperties = rows.length;
-        this.loading = false; 
-      },
-      error: () => { 
-        this.properties = []; 
-        this.totalProperties = 0;
-        this.loading = false; 
-      },
-    });
-  }
-
-  onSearch(params: SearchParams) {
+  loadInitialData(): void {
     this.loading = true;
-    this.api.search(params).subscribe({
-      next: rows => { 
-        this.properties = rows; 
-        this.totalProperties = rows.length;
-        this.loading = false; 
+    this.api.list().subscribe({
+      next: (data) => {
+        this.properties = data;
+        this.allProperties = data; // Guarda el estado inicial
+        this.loading = false;
       },
-      error: () => { 
-        this.properties = []; 
-        this.totalProperties = 0;
-        this.loading = false; 
+      error: (err) => {
+        console.error('Error al cargar propiedades', err);
+        this.loading = false;
       },
     });
+  }
+
+  onSearch(params: SearchParams): void {
+    this.loading = true;
+    // --- CORRECCIÓN AQUÍ ---
+    // Añade this.TIPO_NEGOCIO_ID como segundo argumento
+    this.api.search(params, this.TIPO_NEGOCIO_ID).subscribe({
+      next: (data) => {
+        this.properties = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al buscar propiedades', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  onReset(): void {
+    // Resetea la lista a la carga inicial
+    this.properties = [...this.allProperties];
   }
 }

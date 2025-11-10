@@ -9,18 +9,21 @@ $radius: 8px;
 
 // ===== Container compacto =====
 .search-filter-container {
-  background: white;
-  border: 1px solid $border;
-  border-radius: $radius;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+  // --- NUEVOS ESTILOS ---
+  max-width: 1200px;      // No ocupará toda la pantalla
+  margin: 20px auto;      // Centrado y con espacio vertical
+  padding: 20px;          // Espacio interno
+  background: #ffffff;  // Fondo blanco para que se vea
+  border-radius: 16px;    // ¡Redondeado!
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); // Sombra suave
+  box-sizing: border-box;
+  // --------------------
 
-.search-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  .search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 
 // ===== Header oculto =====
@@ -479,4 +482,58 @@ select.field-input {
   .section-grid-three {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ... Tus estilos existentes ... */
+
+/* --- NUEVOS ESTILOS PARA DROPDOWN PERSONALIZADO --- */
+
+.custom-dropdown-container {
+  position: relative; // Contenedor padre para el dropdown
+}
+
+.custom-dropdown-list {
+  position: absolute;
+  top: 100%; // Justo debajo del input
+  left: 0;
+  width: 100%;
+  min-width: 200px; // Ancho mínimo
+  max-height: 250px; // Altura máxima antes de scroll
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  margin: 4px 0 0 0;
+  list-style: none;
+  z-index: 1000; // Asegura que esté por encima de otro contenido
+
+  li {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    &.disabled {
+      color: #999;
+      cursor: not-allowed;
+      background-color: #fff;
+    }
+  }
+}
+
+// Asegurar que el input se vea igual que el select
+.filter-chip input.chip-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none; // Quitar flecha de select
+  padding-right: 12px; // Ajustar padding
+  width: 100%; // Ocupar espacio
 }

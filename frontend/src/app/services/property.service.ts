@@ -18,6 +18,7 @@ export interface SearchParams {
 @Injectable({ providedIn: 'root' })
 export class PropertyService {
   private http = inject(HttpClient);
+  // Asegúrate que esta URL apunte a tu backend de casita-azul-app
   private base = 'http://localhost:5000/api/propiedades';
 
   // IDs de tipos de negocio
@@ -86,27 +87,17 @@ export class PropertyService {
   }
 
   // BÚSQUEDA COMPLETA con filtros del backend Y frontend
-  search(params: SearchParams): Observable<Property[]> {
-    // Construir parámetros para el backend
+  // Esta es la función corregida
+  search(params: SearchParams, tipo_negocio_id: string): Observable<Property[]> {
+    
+    // 1. Construir parámetros para el backend (SOLO los que sí entiende)
     let httpParams = new HttpParams()
-      .set('tipo_negocio_id', this.ID_TIPO_VENTA)
+      .set('tipo_negocio_id', tipo_negocio_id)
       .set('estado_publicacion_id__not_in', this.ESTADOS_EXCLUIDOS);
-
-    // Agregar filtros de backend si existen
-    if (params.tipo_propiedad_id) {
-      httpParams = httpParams.set('tipo_propiedad_id', params.tipo_propiedad_id.toString());
-    }
-    if (params.estado_id) {
-      httpParams = httpParams.set('estado_id', params.estado_id.toString());
-    }
-    if (params.ciudad_id) {
-      httpParams = httpParams.set('ciudad_id', params.ciudad_id.toString());
-    }
-
-    // Obtener propiedades del backend con filtros aplicados
     return this.listFiltered(httpParams).pipe(
       map(properties => {
-        // Aplicar filtros adicionales en el frontend
+        
+        // 3. Aplicar TODOS los filtros adicionales en el FRONTEND
         return properties.filter(p => {
 
           // Filtro de texto
@@ -119,6 +110,23 @@ export class PropertyService {
             }
           }
 
+          // --- LÓGICA DE FILTRADO AÑADIDA (INICIO) ---
+          // Filtro de Tipo de Propiedad
+          if (params.tipo_propiedad_id && p.tipo_propiedad_id !== Number(params.tipo_propiedad_id)) {
+            return false;
+          }
+
+          // Filtro de Estado
+          if (params.estado_id && p.estado_id !== Number(params.estado_id)) {
+            return false;
+          }
+
+          // Filtro de Ciudad
+          if (params.ciudad_id && p.ciudad_id !== Number(params.ciudad_id)) {
+            return false;
+          }
+          // --- LÓGICA DE FILTRADO AÑADIDA (FIN) ---
+
           // Filtro de precio
           const precioPropiedad = p.precio || p.precio_alquiler;
           if (precioPropiedad != null) {
@@ -129,6 +137,7 @@ export class PropertyService {
               return false;
             }
           } else {
+            // Si la propiedad no tiene precio, y el usuario filtra por precio, se descarta
             if (params.minPrice != null || params.maxPrice != null) {
               return false;
             }
@@ -145,7 +154,7 @@ export class PropertyService {
             return false;
           }
 
-          return true;
+          return true; // Si la propiedad pasa todos los filtros
         });
       })
     );

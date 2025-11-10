@@ -1,7 +1,8 @@
- import { Component, OnInit, Output, EventEmitter, inject, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, inject, Input } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CatalogService, TipoPropiedad, Estado, Ciudad } from '../../services/catalog.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 export interface SearchParams {
   q?: string;
@@ -15,12 +16,12 @@ export interface SearchParams {
   estacionamientos?: number;
 }
 
- @Component({
+@Component({
   selector: 'app-search-filter',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './search-filter.html', // <-- Usará el nuevo HTML adaptado
-  styleUrls: ['./search-filter.scss'], // <-- Usará el nuevo SCSS adaptado
+  templateUrl: './search-filter.html',
+  styleUrls: ['./search-filter.scss'],
 })
 export class SearchFilterComponent implements OnInit {
   @Output() search = new EventEmitter<SearchParams>();
@@ -31,25 +32,54 @@ export class SearchFilterComponent implements OnInit {
   private catalogService = inject(CatalogService);
 
   form!: FormGroup;
+  
+  // Listas de catálogo originales
   tiposPropiedad: TipoPropiedad[] = [];
   estados: Estado[] = [];
   ciudades: Ciudad[] = [];
-  ciudadesFiltradas: Ciudad[] = [];
+  
+  // --- NUEVAS PROPIEDADES PARA FILTROS "TYPE-AHEAD" ---
+  estadosFiltrados: Estado[] = [];
+  ciudadesFiltradas: Ciudad[] = []; // Ciudades del estado seleccionado
+  ciudadesFiltradasPorBusqueda: Ciudad[] = []; // Ciudades filtradas por "typeo"
+
+  // Banderas para mostrar/ocultar los dropdowns personalizados
+  showEstadosDropdown = false;
+  showCiudadesDropdown = false;
+  // --- FIN NUEVAS PROPIEDADES ---
+
   isLoading = false;
   showAdvancedFilters = false;
 
   ngOnInit(): void {
     this.initForm();
     this.loadCatalogos();
-    this.setupEstadoListener();
+    this.setupSearchListeners(); // <-- Reemplaza setupEstadoListener
+  }
+
+  // --- FUNCIÓN DE AYUDA PARA IGNORAR ACENTOS Y MAYÚSCULAS ---
+  private normalizeString(str: string): string {
+    if (!str) return '';
+    return str
+      .normalize("NFD") // Descompone caracteres (ej: 'é' -> 'e' + '́')
+      .replace(/[\u0300-\u036f]/g, "") // Elimina los acentos
+      .toLowerCase(); // Convierte a minúsculas
   }
 
   private initForm(): void {
     this.form = this.fb.group({
       q: [''],
       tipo_propiedad_id: [''],
-      estado_id: [''],
+      
+      // --- CAMBIOS EN EL FORMULARIO ---
+      // Mantienen el ID seleccionado
+      estado_id: [''], 
       ciudad_id: [''],
+      // Nuevos controles para el texto que el usuario escribe
+      estadoSearchText: [''],
+      ciudadSearchText: [''],
+      // --- FIN CAMBIOS ---
+
       minPrice: [''],
       maxPrice: [''],
       habitaciones: [''],
@@ -64,6 +94,7 @@ export class SearchFilterComponent implements OnInit {
         this.tiposPropiedad = catalogos.tipos_propiedad;
         this.estados = catalogos.estados;
         this.ciudades = catalogos.ciudades;
+        this.estadosFiltrados = [...this.estados]; // Llenar al inicio
         console.log('Catálogos cargados:', catalogos);
       },
       error: (err) => {
@@ -72,19 +103,75 @@ export class SearchFilterComponent implements OnInit {
     });
   }
 
-  private setupEstadoListener(): void {
+  // --- LÓGICA DE BÚSQUEDA "TYPE-AHEAD" ---
+  private setupSearchListeners(): void {
+    
+    // 1. Escuchar cambios en el input de ESTADO
+    this.form.get('estadoSearchText')?.valueChanges.pipe(
+      debounceTime(200),
+      distinctUntilChanged()
+    ).subscribe(searchText => {
+      const normalizedQuery = this.normalizeString(searchText);
+      if (!normalizedQuery) {
+        this.estadosFiltrados = [...this.estados]; // Mostrar todos si está vacío
+      } else {
+        this.estadosFiltrados = this.estados.filter(estado =>
+          this.normalizeString(estado.nombre).includes(normalizedQuery)
+        );
+      }
+    });
+
+    // 2. Escuchar cambios en el ID de ESTADO (para filtrar ciudades)
     this.form.get('estado_id')?.valueChanges.subscribe(estadoId => {
       if (estadoId) {
         this.ciudadesFiltradas = this.ciudades.filter(
           c => c.estado_id === Number(estadoId)
         );
-        // Limpiar ciudad cuando cambia el estado
-        this.form.get('ciudad_id')?.setValue('');
       } else {
         this.ciudadesFiltradas = [];
       }
+      this.ciudadesFiltradasPorBusqueda = [...this.ciudadesFiltradas]; // Resetear lista de búsqueda
+      this.form.get('ciudadSearchText')?.setValue('', { emitEvent: false }); // Limpiar texto de ciudad
+      this.form.get('ciudad_id')?.setValue('', { emitEvent: false }); // Limpiar ID de ciudad
+    });
+
+    // 3. Escuchar cambios en el input de CIUDAD
+    this.form.get('ciudadSearchText')?.valueChanges.pipe(
+      debounceTime(200),
+      distinctUntilChanged()
+    ).subscribe(searchText => {
+      const normalizedQuery = this.normalizeString(searchText);
+      if (!normalizedQuery) {
+        this.ciudadesFiltradasPorBusqueda = [...this.ciudadesFiltradas]; // Mostrar todas
+      } else {
+        this.ciudadesFiltradasPorBusqueda = this.ciudadesFiltradas.filter(ciudad =>
+          this.normalizeString(ciudad.nombre).includes(normalizedQuery)
+        );
+      }
     });
   }
+
+  // --- NUEVAS FUNCIONES PARA SELECCIONAR Y OCULTAR DROPDOWNS ---
+
+  selectEstado(estado: Estado): void {
+    this.form.get('estado_id')?.setValue(estado.id);
+    this.form.get('estadoSearchText')?.setValue(estado.nombre, { emitEvent: false });
+    this.showEstadosDropdown = false;
+  }
+
+  selectCiudad(ciudad: Ciudad): void {
+    this.form.get('ciudad_id')?.setValue(ciudad.id);
+    this.form.get('ciudadSearchText')?.setValue(ciudad.nombre, { emitEvent: false });
+    this.showCiudadesDropdown = false;
+  }
+
+  // Ocultar dropdowns si se hace clic fuera
+  closeDropdowns(): void {
+    this.showEstadosDropdown = false;
+    this.showCiudadesDropdown = false;
+  }
+
+  // --- FIN NUEVAS FUNCIONES ---
 
   toggleAdvancedFilters(): void {
     this.showAdvancedFilters = !this.showAdvancedFilters;
@@ -100,8 +187,11 @@ export class SearchFilterComponent implements OnInit {
       // Solo incluir valores que no estén vacíos
       if (formValue.q) params.q = formValue.q;
       if (formValue.tipo_propiedad_id) params.tipo_propiedad_id = Number(formValue.tipo_propiedad_id);
+      
+      // Usar los IDs seleccionados
       if (formValue.estado_id) params.estado_id = Number(formValue.estado_id);
       if (formValue.ciudad_id) params.ciudad_id = Number(formValue.ciudad_id);
+      
       if (formValue.minPrice) params.minPrice = Number(formValue.minPrice);
       if (formValue.maxPrice) params.maxPrice = Number(formValue.maxPrice);
       if (formValue.habitaciones) params.habitaciones = Number(formValue.habitaciones);
@@ -119,16 +209,27 @@ export class SearchFilterComponent implements OnInit {
   }
 
   onReset(): void {
-    this.form.reset();
+    this.form.reset({
+      q: '',
+      tipo_propiedad_id: '',
+      estado_id: '',
+      ciudad_id: '',
+      estadoSearchText: '',
+      ciudadSearchText: '',
+      minPrice: '',
+      maxPrice: '',
+      habitaciones: '',
+      banos: '',
+      estacionamientos: ''
+    });
     this.ciudadesFiltradas = [];
+    this.estadosFiltrados = [...this.estados];
+    this.ciudadesFiltradasPorBusqueda = [];
     this.showAdvancedFilters = false;
     this.reset.emit();
   }
 
-  /**
-   * Verifica si hay filtros avanzados activos
-   */
-  hasActiveFilters(): boolean {
+    hasActiveFilters(): boolean {
     const formValue = this.form.value;
     return !!(
       formValue.estado_id ||
@@ -159,3 +260,4 @@ export class SearchFilterComponent implements OnInit {
     return count;
   }
 }
+

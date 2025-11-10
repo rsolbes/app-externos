@@ -1,13 +1,18 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>En alquiler</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Alquileres</ion-title>
+    </ion-toolbar>
+  </ion-header>
 
-<ion-content class="ion-padding">
-  <app-property-list
-    [properties]="properties"
+  <app-search-filter 
+    (search)="onSearch($event)" 
+    (reset)="onReset()"
+    [totalProperties]="properties.length">
+  </app-search-filter>
+  <app-property-list 
+    [properties]="properties" 
     [loading]="loading">
   </app-property-list>
-
+  
 </ion-content>

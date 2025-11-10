@@ -1,40 +1,13 @@
-<div class="search-filter-container">
+<div class="search-filter-container" (click)="closeDropdowns()"> 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="search-form">
     
     <div class="filters-premium">
       
-      <!-- Búsqueda principal compacta -->
       <div class="search-main">
-        <div class="search-box-premium">
-          <div class="search-icon-wrapper">
-            <svg class="search-icon-animated" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-          </div>
-          <input 
-            type="text" 
-            id="q" 
-            formControlName="q" 
-            placeholder="Buscar propiedades..."
-            class="search-input-premium"
-          />
         </div>
-        <button type="submit" class="btn-search-inline" [disabled]="isLoading">
-          @if (isLoading) {
-            <span class="spinner-premium"></span>
-          } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-            Buscar
-          }
-        </button>
-      </div>
 
-      <!-- Filtros horizontales compactos -->
       <div class="quick-filters">
+        
         <div class="filter-chip">
           <label class="chip-label">Tipo</label>
           <select formControlName="tipo_propiedad_id" class="chip-select">
@@ -45,30 +18,49 @@
           </select>
         </div>
 
-        <div class="filter-chip">
+        <div class="filter-chip custom-dropdown-container">
           <label class="chip-label">Estado</label>
-          <select formControlName="estado_id" class="chip-select">
-            <option value="">Todos</option>
-            @for (estado of estados; track estado.id) {
-              <option [value]="estado.id">{{ estado.nombre }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="filter-chip">
-          <label class="chip-label">Ciudad</label>
-          <select 
-            formControlName="ciudad_id" 
+          <input 
+            type="text"
+            formControlName="estadoSearchText"
             class="chip-select"
-            [disabled]="!form.get('estado_id')?.value"
-          >
-            <option value="">Todas</option>
-            @for (ciudad of ciudadesFiltradas; track ciudad.id) {
-              <option [value]="ciudad.id">{{ ciudad.nombre }}</option>
-            }
-          </select>
+            placeholder="Escribe un estado..."
+            (focus)="showEstadosDropdown = true"
+            (click)="$event.stopPropagation()" 
+          />
+          @if (showEstadosDropdown) {
+            <ul class="custom-dropdown-list" (click)="$event.stopPropagation()">
+              @for (estado of estadosFiltrados; track estado.id) {
+                <li (click)="selectEstado(estado)">{{ estado.nombre }}</li>
+              }
+              @if (estadosFiltrados.length === 0) {
+                <li class="disabled">Sin resultados</li>
+              }
+            </ul>
+          }
         </div>
-
+        <div class="filter-chip custom-dropdown-container">
+          <label class="chip-label">Ciudad</label>
+          <input 
+            type="text"
+            formControlName="ciudadSearchText"
+            class="chip-select"
+            placeholder="Escribe una ciudad..."
+            [disabled]="!form.get('estado_id')?.value"
+            (focus)="showCiudadesDropdown = true"
+            (click)="$event.stopPropagation()"
+          />
+          @if (showCiudadesDropdown) {
+            <ul class="custom-dropdown-list" (click)="$event.stopPropagation()">
+              @for (ciudad of ciudadesFiltradasPorBusqueda; track ciudad.id) {
+                <li (click)="selectCiudad(ciudad)">{{ ciudad.nombre }}</li>
+              }
+              @if (ciudadesFiltradasPorBusqueda.length === 0) {
+                <li class="disabled">Sin resultados</li>
+              }
+            </ul>
+          }
+        </div>
         <button 
           type="button" 
           (click)="toggleAdvancedFilters()"
@@ -86,13 +78,12 @@
             <line x1="9" y1="8" x2="15" y2="8"></line>
             <line x1="17" y1="16" x2="23" y2="16"></line>
           </svg>
-          <span>Más</span>
+          
           @if (hasActiveFilters()) {
             <span class="chip-badge">{{ activeFiltersCount() }}</span>
           }
         </button>
       </div>
-
     </div>
 
     <!-- Panel expandible de filtros avanzados (sin modal) -->
