@@ -1,84 +1,221 @@
-<!-- 
-  Este es el HTML adaptado a tu diseño, 
-  conectado al formGroup y los métodos del archivo .ts.
--->
-<form class="search-filter-container" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-  
-  <!-- Filtros Principales -->
-  <div class="filters">
+<div class="search-filter-container">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="search-form">
     
-    <!-- Campo de Búsqueda (Zona/Palabra) -->
-    <input 
-      type="text" 
-      placeholder="Ubicación o palabra clave..." 
-      class="filter-input"
-      formControlName="q">
-
-    <!-- Campo de Precio Mínimo -->
-    <input 
-      type="number" 
-      placeholder="Precio Mín." 
-      class="filter-input"
-      formControlName="minPrice">
-
-    <!-- Campo de Precio Máximo -->
-    <input 
-      type="number" 
-      placeholder="Precio Máx." 
-      class="filter-input"
-      formControlName="maxPrice">
-
-    <!-- Campo de Tipo de Inmueble -->
-    <select class="filter-select" formControlName="type">
-      <option value="">Tipo de Inmueble</option>
-      <option value="Casa">Casa</option>
-      <option value="Departamento">Departamento</option>
-      <option value="Terreno">Terreno</option>
-      <option value="Comercial">Comercial</option>
-      <option value="Oficina">Oficina</option>
-    </select>
-
-    <!-- Botón de Búsqueda Avanzada -->
-    <button type="button" class="btn-advanced" (click)="toggleAdvancedFilters()">
-      Avanzada
-      <svg class="chevron" [class.rotated]="showAdvancedFilters()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-      </svg>
-    </button>
-
-    <!-- Botón de Búsqueda -->
-    <button type="submit" class="btn-primary">BUSCAR</button>
-  </div>
-
-  <!-- Filtros Avanzados (Aparecen al hacer clic) -->
-  @if (showAdvancedFilters()) {
-    <div class="advanced-filters filters">
+    <div class="filters-premium">
       
-      <!-- Campo de Habitaciones -->
-      <input 
-        type="number" 
-        placeholder="Habitaciones" 
-        class="filter-input"
-        formControlName="habitaciones">
+      <!-- Búsqueda principal compacta -->
+      <div class="search-main">
+        <div class="search-box-premium">
+          <div class="search-icon-wrapper">
+            <svg class="search-icon-animated" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </div>
+          <input 
+            type="text" 
+            id="q" 
+            formControlName="q" 
+            placeholder="Buscar propiedades..."
+            class="search-input-premium"
+          />
+        </div>
+        <button type="submit" class="btn-search-inline" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner-premium"></span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            Buscar
+          }
+        </button>
+      </div>
 
-      <!-- Campo de Baños -->
-      <input 
-        type="number" 
-        placeholder="Baños" 
-        class="filter-input"
-        formControlName="banos">
+      <!-- Filtros horizontales compactos -->
+      <div class="quick-filters">
+        <div class="filter-chip">
+          <label class="chip-label">Tipo</label>
+          <select formControlName="tipo_propiedad_id" class="chip-select">
+            <option value="">Todos</option>
+            @for (tipo of tiposPropiedad; track tipo.id) {
+              <option [value]="tipo.id">{{ tipo.nombre }}</option>
+            }
+          </select>
+        </div>
 
-      <!-- Campo de Estacionamientos -->
-      <input 
-        type="number" 
-        placeholder="Estacionamientos" 
-        class="filter-input"
-        formControlName="estacionamientos">
-      
-      <!-- Botón de Limpiar (Aparece con los filtros avanzados) -->
-      <button type="button" class="btn-secondary" (click)="onReset()">Limpiar Filtros</button>
+        <div class="filter-chip">
+          <label class="chip-label">Estado</label>
+          <select formControlName="estado_id" class="chip-select">
+            <option value="">Todos</option>
+            @for (estado of estados; track estado.id) {
+              <option [value]="estado.id">{{ estado.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-chip">
+          <label class="chip-label">Ciudad</label>
+          <select 
+            formControlName="ciudad_id" 
+            class="chip-select"
+            [disabled]="!form.get('estado_id')?.value"
+          >
+            <option value="">Todas</option>
+            @for (ciudad of ciudadesFiltradas; track ciudad.id) {
+              <option [value]="ciudad.id">{{ ciudad.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <button 
+          type="button" 
+          (click)="toggleAdvancedFilters()"
+          class="filter-chip filter-chip-button"
+          [class.active]="showAdvancedFilters || hasActiveFilters()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          <span>Más</span>
+          @if (hasActiveFilters()) {
+            <span class="chip-badge">{{ activeFiltersCount() }}</span>
+          }
+        </button>
+      </div>
 
     </div>
-  }
-</form>
 
+    <!-- Panel expandible de filtros avanzados (sin modal) -->
+    @if (showAdvancedFilters) {
+      <div class="advanced-modal">
+        
+        <div class="modal-header">
+          <div class="modal-title-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            <h3>Filtros Avanzados</h3>
+          </div>
+          <button 
+            type="button" 
+            (click)="toggleAdvancedFilters()"
+            class="btn-close-modal"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          
+          <!-- Precio -->
+          <div class="filter-section">
+            <h4 class="section-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+              Precio
+            </h4>
+            <div class="section-grid">
+              <div class="form-field">
+                <label>Desde</label>
+                <input 
+                  type="number" 
+                  formControlName="minPrice" 
+                  placeholder="$0"
+                  class="field-input"
+                  step="10000"
+                />
+              </div>
+              <div class="form-field">
+                <label>Hasta</label>
+                <input 
+                  type="number" 
+                  formControlName="maxPrice" 
+                  placeholder="Sin límite"
+                  class="field-input"
+                  step="10000"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Características -->
+          <div class="filter-section">
+            <h4 class="section-title">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              Características
+            </h4>
+            <div class="section-grid-three">
+              <div class="form-field">
+                <label>Habitaciones</label>
+                <input 
+                  type="number" 
+                  formControlName="habitaciones" 
+                  placeholder="Min."
+                  class="field-input"
+                  min="0"
+                />
+              </div>
+              <div class="form-field">
+                <label>Baños</label>
+                <input 
+                  type="number" 
+                  formControlName="banos" 
+                  placeholder="Min."
+                  class="field-input"
+                  min="0"
+                />
+              </div>
+              <div class="form-field">
+                <label>Estacionamientos</label>
+                <input 
+                  type="number" 
+                  formControlName="estacionamientos" 
+                  placeholder="Min."
+                  class="field-input"
+                  min="0"
+                />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" (click)="onReset()" class="btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            Limpiar
+          </button>
+          <button type="button" class="btn-primary" (click)="toggleAdvancedFilters()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Aplicar
+          </button>
+        </div>
+
+      </div>
+    }
+
+  </form>
+</div>

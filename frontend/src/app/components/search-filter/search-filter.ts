@@ -1,75 +1,161 @@
-import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
+ import { Component, OnInit, Output, EventEmitter, inject, Input } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-// Asegúrate de que esta ruta a tu servicio sea correcta
-import { PropertyService, SearchParams } from '../../services/property.service';
+import { CatalogService, TipoPropiedad, Estado, Ciudad } from '../../services/catalog.service';
 
-@Component({
+export interface SearchParams {
+  q?: string;
+  tipo_propiedad_id?: number;
+  estado_id?: number;
+  ciudad_id?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  habitaciones?: number;
+  banos?: number;
+  estacionamientos?: number;
+}
+
+ @Component({
   selector: 'app-search-filter',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './search-filter.html', // <-- Usará el nuevo HTML adaptado
   styleUrls: ['./search-filter.scss'], // <-- Usará el nuevo SCSS adaptado
 })
-export class SearchFilterComponent {
-  private fb = inject(FormBuilder);
+export class SearchFilterComponent implements OnInit {
   @Output() search = new EventEmitter<SearchParams>();
+  @Output() reset = new EventEmitter<void>();
+  @Input() totalProperties: number = 0;
 
-  // Señal para mostrar/ocultar filtros avanzados
-  showAdvancedFilters = signal(false);
+  private fb = inject(FormBuilder);
+  private catalogService = inject(CatalogService);
 
-  // Formulario COMPLETO con todos los campos
-  form = this.fb.group({
-    q: [''],
-    minPrice: [''],
-    maxPrice: [''],
-    type: [''],
-    habitaciones: [''], // <-- Campo avanzado
-    banos: [''],        // <-- Campo avanzado
-    estacionamientos: [''], // <-- Campo avanzado
-  });
+  form!: FormGroup;
+  tiposPropiedad: TipoPropiedad[] = [];
+  estados: Estado[] = [];
+  ciudades: Ciudad[] = [];
+  ciudadesFiltradas: Ciudad[] = [];
+  isLoading = false;
+  showAdvancedFilters = false;
 
-  // Método para el botón "Búsqueda Avanzada"
-  toggleAdvancedFilters() {
-    this.showAdvancedFilters.update(value => !value);
+  ngOnInit(): void {
+    this.initForm();
+    this.loadCatalogos();
+    this.setupEstadoListener();
   }
 
-  onSubmit() {
-    const v = this.form.value;
-
-    // Lógica de conversión de números (limpia y robusta)
-    const minPrice = v.minPrice ? parseFloat(v.minPrice) : undefined;
-    const maxPrice = v.maxPrice ? parseFloat(v.maxPrice) : undefined;
-    const habitaciones = v.habitaciones ? parseFloat(v.habitaciones) : undefined;
-    const banos = v.banos ? parseFloat(v.banos) : undefined;
-    const estacionamientos = v.estacionamientos ? parseFloat(v.estacionamientos) : undefined;
-
-    this.search.emit({
-      q: v.q || undefined,
-      minPrice: !isNaN(minPrice!) ? minPrice : undefined,
-      maxPrice: !isNaN(maxPrice!) ? maxPrice : undefined,
-      type: v.type || undefined,
-      habitaciones: !isNaN(habitaciones!) ? habitaciones : undefined,
-      banos: !isNaN(banos!) ? banos : undefined,
-      estacionamientos: !isNaN(estacionamientos!) ? estacionamientos : undefined,
+  private initForm(): void {
+    this.form = this.fb.group({
+      q: [''],
+      tipo_propiedad_id: [''],
+      estado_id: [''],
+      ciudad_id: [''],
+      minPrice: [''],
+      maxPrice: [''],
+      habitaciones: [''],
+      banos: [''],
+      estacionamientos: ['']
     });
   }
 
-  // Método para el botón de "Limpiar"
-  onReset() {
-    this.form.reset({
-      q: '',
-      minPrice: '',
-      maxPrice: '',
-      type: '',
-      habitaciones: '',
-      banos: '',
-      estacionamientos: '',
+  private loadCatalogos(): void {
+    this.catalogService.getCatalogos().subscribe({
+      next: (catalogos) => {
+        this.tiposPropiedad = catalogos.tipos_propiedad;
+        this.estados = catalogos.estados;
+        this.ciudades = catalogos.ciudades;
+        console.log('Catálogos cargados:', catalogos);
+      },
+      error: (err) => {
+        console.error('Error al cargar catálogos:', err);
+      }
     });
-    // Oculta los filtros avanzados al limpiar
-    this.showAdvancedFilters.set(false);
-    // Emite una búsqueda "vacía" para recargar todas las propiedades
-    this.search.emit({});
+  }
+
+  private setupEstadoListener(): void {
+    this.form.get('estado_id')?.valueChanges.subscribe(estadoId => {
+      if (estadoId) {
+        this.ciudadesFiltradas = this.ciudades.filter(
+          c => c.estado_id === Number(estadoId)
+        );
+        // Limpiar ciudad cuando cambia el estado
+        this.form.get('ciudad_id')?.setValue('');
+      } else {
+        this.ciudadesFiltradas = [];
+      }
+    });
+  }
+
+  toggleAdvancedFilters(): void {
+    this.showAdvancedFilters = !this.showAdvancedFilters;
+  }
+
+  onSubmit(): void {
+    if (this.form.valid) {
+      this.isLoading = true;
+      
+      const formValue = this.form.value;
+      const params: SearchParams = {};
+
+      // Solo incluir valores que no estén vacíos
+      if (formValue.q) params.q = formValue.q;
+      if (formValue.tipo_propiedad_id) params.tipo_propiedad_id = Number(formValue.tipo_propiedad_id);
+      if (formValue.estado_id) params.estado_id = Number(formValue.estado_id);
+      if (formValue.ciudad_id) params.ciudad_id = Number(formValue.ciudad_id);
+      if (formValue.minPrice) params.minPrice = Number(formValue.minPrice);
+      if (formValue.maxPrice) params.maxPrice = Number(formValue.maxPrice);
+      if (formValue.habitaciones) params.habitaciones = Number(formValue.habitaciones);
+      if (formValue.banos) params.banos = Number(formValue.banos);
+      if (formValue.estacionamientos) params.estacionamientos = Number(formValue.estacionamientos);
+
+      console.log('Parámetros de búsqueda:', params);
+      this.search.emit(params);
+      
+      // Simular fin de carga
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 500);
+    }
+  }
+
+  onReset(): void {
+    this.form.reset();
+    this.ciudadesFiltradas = [];
+    this.showAdvancedFilters = false;
+    this.reset.emit();
+  }
+
+  /**
+   * Verifica si hay filtros avanzados activos
+   */
+  hasActiveFilters(): boolean {
+    const formValue = this.form.value;
+    return !!(
+      formValue.estado_id ||
+      formValue.ciudad_id ||
+      formValue.minPrice ||
+      formValue.maxPrice ||
+      formValue.habitaciones ||
+      formValue.banos ||
+      formValue.estacionamientos
+    );
+  }
+
+  /**
+   * Cuenta cuántos filtros avanzados están activos
+   */
+  activeFiltersCount(): number {
+    const formValue = this.form.value;
+    let count = 0;
+    
+    if (formValue.estado_id) count++;
+    if (formValue.ciudad_id) count++;
+    if (formValue.minPrice) count++;
+    if (formValue.maxPrice) count++;
+    if (formValue.habitaciones) count++;
+    if (formValue.banos) count++;
+    if (formValue.estacionamientos) count++;
+    
+    return count;
   }
 }
-
