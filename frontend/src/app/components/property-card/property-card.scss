@@ -1,5 +1,3 @@
-// property-card.scss - SIMPLIFICADO Y PROBADO
-
 // ===== TARJETA PRINCIPAL =====
 .card {
   display: flex;
@@ -14,28 +12,28 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   opacity: 0;
   animation: fadeInUp 0.5s ease forwards;
+}
 
-  &.loaded {
-    opacity: 1;
-  }
+.card.loaded {
+  opacity: 1;
+}
 
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+}
 
-    .overlay {
-      opacity: 0.15;
-    }
-  }
+.card:hover .overlay {
+  opacity: 0.15;
+}
 
-  &:active {
-    transform: translateY(-4px) scale(0.99);
-  }
+.card:active {
+  transform: translateY(-4px) scale(0.99);
+}
 
-  &:focus-visible {
-    outline: 3px solid rgba(0, 102, 255, 0.4);
-    outline-offset: 4px;
-  }
+.card:focus-visible {
+  outline: 3px solid rgba(0, 102, 255, 0.4);
+  outline-offset: 4px;
 }
 
 // ===== SECCIÓN DE IMAGEN =====
@@ -50,30 +48,28 @@
   position: relative;
   width: 100%;
   height: 100%;
+}
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
+.image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
 
-  &.loaded {
-    img {
-      opacity: 1;
-      transform: scale(1);
-    }
+.image-wrapper.loaded img {
+  opacity: 1;
+  transform: scale(1);
+}
 
-    .skeleton {
-      opacity: 0;
-    }
-  }
+.image-wrapper.loaded .skeleton {
+  opacity: 0;
+}
 
-  &:hover img {
-    transform: scale(1.05);
-  }
+.image-wrapper:hover img {
+  transform: scale(1.05);
 }
 
 .skeleton {
@@ -110,21 +106,21 @@
   letter-spacing: 0.5px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 2;
-
-  &.rent {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
 }
 
-// ===== BOTÓN DE FAVORITOS - VERSIÓN DEFINITIVA =====
+.tag.rent {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+// ===== BOTÓN DE FAVORITOS (VERSIÓN ÚNICA Y CORRECTA) =====
 .fav-btn {
-  position: absolute !important; // Forzar posición
+  position: absolute !important;
   right: 16px;
   top: 16px;
   width: 44px;
   height: 44px;
-  display: flex !important; // Forzar display
+  display: flex !important;
   align-items: center;
   justify-content: center;
   border: none;
@@ -133,64 +129,60 @@
   background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 3 !important; // Asegurar que esté encima
+  z-index: 3 !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
   padding: 0;
+}
 
-  &:hover {
-    transform: scale(1.15);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  }
+.fav-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
 
-  &:active {
-    transform: scale(0.95);
-  }
+.fav-btn:active {
+  transform: scale(0.95);
+}
 
-  // Estilos para ion-icon
-  .icon-star,
-  ion-icon {
-    font-size: 24px !important;
-    color: #64748b;
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-  }
+.fav-btn .icon-fav,
+.fav-btn ion-icon {
+  font-size: 24px !important;
+  color: #64748b !important; // <-- Color gris inactivo (con !important)
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
 
-  // Estado activo (favorito)
-  &.active {
-    background: rgba(255, 243, 224, 0.98) !important;
+.fav-btn.active {
+  background: rgba(239, 68, 68, 0.15) !important; // Fondo rojo pálido
+}
 
-    .icon-star,
-    ion-icon {
-      color: #fbbf24 !important; // Color dorado/amarillo
-      transform: scale(1.1);
-    }
-  }
+.fav-btn.active .icon-fav,
+.fav-btn.active ion-icon {
+  color: #ef4444 !important; // Color rojo activo
+  transform: scale(1.1);
+}
 
-  // Animación al hacer clic
-  &.animate {
-    animation: heartBeat 0.6s ease;
+.fav-btn.animate {
+  animation: heartBeat 0.6s ease;
+}
 
-    .icon-star,
-    ion-icon {
-      animation: heartPulse 0.6s ease;
-    }
-  }
+.fav-btn.animate .icon-fav,
+.fav-btn.animate ion-icon {
+  animation: heartPulse 0.6s ease;
+}
 
-  // Efecto ripple
-  .ripple {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, transparent 70%);
-    transform: scale(0);
-    opacity: 0;
-    pointer-events: none;
-  }
+.fav-btn .ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, transparent 70%);
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
 
-  &:active .ripple {
-    animation: rippleEffect 0.6s ease;
-  }
+.fav-btn:active .ripple {
+  animation: rippleEffect 0.6s ease;
 }
 
 // ===== CONTENIDO =====
@@ -238,13 +230,13 @@
   color: #64748b;
   font-size: 0.875rem;
   font-weight: 500;
+}
 
-  .icon {
-    width: 18px;
-    height: 18px;
-    color: #0066ff;
-    flex-shrink: 0;
-  }
+.feature .icon {
+  width: 18px;
+  height: 18px;
+  color: #0066ff;
+  flex-shrink: 0;
 }
 
 // ===== PRECIO =====
@@ -278,14 +270,14 @@
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-top: 16px;
+}
 
-  &:has(.btn-maps) {
-    grid-template-columns: 1fr 1fr;
+.actions:has(.btn-maps) {
+  grid-template-columns: 1fr 1fr;
+}
 
-    .btn-primary {
-      grid-column: 1 / -1;
-    }
-  }
+.actions:has(.btn-maps) .btn-primary {
+  grid-column: 1 / -1;
 }
 
 .btn {
@@ -303,58 +295,58 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+}
 
-  .btn-icon {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-  }
+.btn .btn-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-    transform: scale(0);
-    transition: transform 0.5s ease;
-  }
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  transform: scale(0);
+  transition: transform 0.5s ease;
+}
 
-  &:active::before {
-    transform: scale(2);
-  }
+.btn:active::before {
+  transform: scale(2);
+}
 
-  &-primary {
-    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+.btn-primary {
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
-    }
-  }
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+}
 
-  &-whatsapp {
-    background: linear-gradient(135deg, #25d366 0%, #1fb855 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25d366 0%, #1fb855 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
-    }
-  }
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
 
-  &-maps {
-    background: linear-gradient(135deg, #4285f4 0%, #357ae8 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+.btn-maps {
+  background: linear-gradient(135deg, #4285f4 0%, #357ae8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(66, 133, 244, 0.4);
-    }
-  }
+.btn-maps:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(66, 133, 244, 0.4);
 }
 
 // ===== ANIMACIONES =====
@@ -433,12 +425,10 @@
 
   .actions {
     grid-template-columns: 1fr;
+  }
 
-    &:has(.btn-maps) {
-      .btn-primary {
-        grid-column: 1;
-      }
-    }
+  .actions:has(.btn-maps) .btn-primary {
+    grid-column: 1;
   }
 
   .btn {

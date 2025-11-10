@@ -1,20 +1,20 @@
-
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Traspasos</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <app-search-filter 
-    (search)="onSearch($event)" 
-    (reset)="onReset()"
-    [totalProperties]="properties.length">
-  </app-search-filter>
-  <app-property-list 
-    [properties]="properties" 
-    [loading]="loading">
-  </app-property-list>
+<ion-content>
   
+  <div class="hero-section">
+    <app-search-filter 
+      (search)="onSearch($event)" 
+      (reset)="onReset()"
+      [totalProperties]="properties.length">
+    </app-search-filter>
+  </div>
+
+  <div class="results-section">
+    <div class="container">
+      <app-property-list 
+        [properties]="properties" 
+        [loading]="loading">
+      </app-property-list>
+    </div>
+  </div>
+
 </ion-content>

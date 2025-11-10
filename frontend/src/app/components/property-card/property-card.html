@@ -43,10 +43,8 @@
             [attr.aria-pressed]="isFavorite()"
             [attr.aria-label]="isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos'">
 
-      <!-- Usando ion-icon con la clase correcta -->
-      <ion-icon [name]="isFavorite() ? 'star' : 'star-outline'"
-                class="icon-star"></ion-icon>
-
+      <ion-icon [name]="isFavorite() ? 'heart' : 'heart-outline'"
+                class="icon-fav"></ion-icon>
       <span class="ripple"></span>
     </button>
   </div>

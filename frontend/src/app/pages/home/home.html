@@ -1,13 +1,20 @@
 <ion-content>
-  <app-search-filter 
-    (search)="onSearch($event)" 
-    (reset)="onReset()"
-    [totalProperties]="properties.length">
-  </app-search-filter>
+  
+  <div class="hero-section">
+    <app-search-filter 
+      (search)="onSearch($event)" 
+      (reset)="onReset()"
+      [totalProperties]="properties.length">
+    </app-search-filter>
+  </div>
 
-  <app-property-list 
-    [properties]="properties" 
-    [loading]="loading">
-  </app-property-list>
+  <div class="results-section">
+    <div class="container">
+      <app-property-list 
+        [properties]="properties" 
+        [loading]="loading">
+      </app-property-list>
+    </div>
+  </div>
 
 </ion-content>
