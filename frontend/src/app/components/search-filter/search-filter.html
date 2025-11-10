@@ -1,0 +1,84 @@
+<!-- 
+  Este es el HTML adaptado a tu diseño, 
+  conectado al formGroup y los métodos del archivo .ts.
+-->
+<form class="search-filter-container" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+  
+  <!-- Filtros Principales -->
+  <div class="filters">
+    
+    <!-- Campo de Búsqueda (Zona/Palabra) -->
+    <input 
+      type="text" 
+      placeholder="Ubicación o palabra clave..." 
+      class="filter-input"
+      formControlName="q">
+
+    <!-- Campo de Precio Mínimo -->
+    <input 
+      type="number" 
+      placeholder="Precio Mín." 
+      class="filter-input"
+      formControlName="minPrice">
+
+    <!-- Campo de Precio Máximo -->
+    <input 
+      type="number" 
+      placeholder="Precio Máx." 
+      class="filter-input"
+      formControlName="maxPrice">
+
+    <!-- Campo de Tipo de Inmueble -->
+    <select class="filter-select" formControlName="type">
+      <option value="">Tipo de Inmueble</option>
+      <option value="Casa">Casa</option>
+      <option value="Departamento">Departamento</option>
+      <option value="Terreno">Terreno</option>
+      <option value="Comercial">Comercial</option>
+      <option value="Oficina">Oficina</option>
+    </select>
+
+    <!-- Botón de Búsqueda Avanzada -->
+    <button type="button" class="btn-advanced" (click)="toggleAdvancedFilters()">
+      Avanzada
+      <svg class="chevron" [class.rotated]="showAdvancedFilters()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+      </svg>
+    </button>
+
+    <!-- Botón de Búsqueda -->
+    <button type="submit" class="btn-primary">BUSCAR</button>
+  </div>
+
+  <!-- Filtros Avanzados (Aparecen al hacer clic) -->
+  @if (showAdvancedFilters()) {
+    <div class="advanced-filters filters">
+      
+      <!-- Campo de Habitaciones -->
+      <input 
+        type="number" 
+        placeholder="Habitaciones" 
+        class="filter-input"
+        formControlName="habitaciones">
+
+      <!-- Campo de Baños -->
+      <input 
+        type="number" 
+        placeholder="Baños" 
+        class="filter-input"
+        formControlName="banos">
+
+      <!-- Campo de Estacionamientos -->
+      <input 
+        type="number" 
+        placeholder="Estacionamientos" 
+        class="filter-input"
+        formControlName="estacionamientos">
+      
+      <!-- Botón de Limpiar (Aparece con los filtros avanzados) -->
+      <button type="button" class="btn-secondary" (click)="onReset()">Limpiar Filtros</button>
+
+    </div>
+  }
+</form>
+

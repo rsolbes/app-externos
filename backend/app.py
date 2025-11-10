@@ -2,8 +2,13 @@ import os
 import uuid
 from datetime import datetime
 import psycopg2
+<<<<<<< HEAD
 from psycopg2.extras import RealDictCursor # Added for is_admin
 from flask import Flask, jsonify, request # request was already here, ensure RealDictCursor is imported
+=======
+from psycopg2.extras import RealDictCursor
+from flask import Flask, jsonify, request
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
 from flask_cors import CORS
 from supabase import create_client, Client
 from werkzeug.utils import secure_filename
@@ -11,6 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+<<<<<<< HEAD
 origins = [
     "http://localhost:4200",  # Tu app de admin
     "http://localhost:50687", # Tu otra app
@@ -43,16 +49,41 @@ supabase_admin: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 # Configuración de Storage
 BUCKET_NAME = "imagenes casas" # Asegúrate que este sea el nombre correcto de tu bucket
+=======
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:50687')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+# Configuración de Supabase Storage
+SUPABASE_URL = "https://izozjytmktbuhpttczid.supabase.co"
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+BUCKET_NAME = "imagenes casas"
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+<<<<<<< HEAD
 # Conexión a Base de Datos (directa para operaciones específicas)
 def get_db_connection():
     conn = psycopg2.connect(
         user=os.getenv("DB_USER", "postgres.izozjytmktbuhpttczid"),
         password=os.getenv("PASSWORD", "bddingsoftware123"), # Asegúrate que esto esté en tu .env real
+=======
+def get_db_connection():
+    conn = psycopg2.connect(
+        user=os.getenv("DB_USER", "postgres.izozjytmktbuhpttczid"),
+        password=os.getenv("PASSWORD", "bddingsoftware123"),
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         host=os.getenv("HOST", "aws-1-us-east-2.pooler.supabase.com"),
         port=os.getenv("PORT", "6543"),
         dbname=os.getenv("DBNAME", "postgres"),
@@ -60,6 +91,7 @@ def get_db_connection():
     )
     return conn
 
+<<<<<<< HEAD
 # --- Funciones Auxiliares para Roles de Admin ---
 def get_user_id_from_token(request):
     """Extrae el user ID del token de autorización."""
@@ -94,22 +126,33 @@ def is_admin(user_id: str) -> bool:
 # --- End Helper Functions ---
 
 
+=======
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
 @app.route('/api/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':
         return '', 204
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     try:
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
+<<<<<<< HEAD
         role = data.get('role', 'user') # Get role from request, default to 'user'
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Use Supabase Auth for registration
         response = supabase.auth.sign_up({
             "email": email,
             "password": password
         })
+<<<<<<< HEAD
 
         # --- Set the role in public.profiles ---
         # Note: This happens AFTER signup. Consider a trigger or edge function for atomicity.
@@ -133,10 +176,14 @@ def register():
                     conn.close()
         # --- End Role Setting ---
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({
             "status": "success",
             "message": "Usuario registrado. Revisa tu email para confirmar."
         }), 201
+<<<<<<< HEAD
 
     except Exception as e:
         print(f"Error en registro: {e}")
@@ -146,32 +193,57 @@ def register():
         return jsonify({"error": str(e)}), 400
 
 
+=======
+        
+    except Exception as e:
+        print(f"Error en registro: {e}")
+        return jsonify({"error": str(e)}), 400
+
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
 @app.route('/api/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
         return '', 204
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     try:
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Use Supabase Auth for login
         response = supabase.auth.sign_in_with_password({
             "email": email,
             "password": password
         })
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({
             "access_token": response.session.access_token,
             "refresh_token": response.session.refresh_token,
             "user": {
                 "id": response.user.id,
                 "email": response.user.email
+<<<<<<< HEAD
                 # You might want to fetch and include the role here as well
             }
         }), 200
 
+=======
+            }
+        }), 200
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     except Exception as e:
         print(f"Error en login: {e}")
         return jsonify({"error": "Credenciales inválidas"}), 401
@@ -180,6 +252,7 @@ def login():
 def logout():
     if request.method == 'OPTIONS':
         return '', 204
+<<<<<<< HEAD
 
     try:
         # It's better to invalidate the token provided by the client
@@ -194,6 +267,11 @@ def logout():
              # Fallback if no token provided (less secure, depends on Supabase client state)
              supabase.auth.sign_out()
 
+=======
+    
+    try:
+        supabase.auth.sign_out()
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({"status": "success"}), 200
     except Exception as e:
         print(f"Error en logout: {e}")
@@ -203,12 +281,17 @@ def logout():
 def get_user():
     if request.method == 'OPTIONS':
         return '', 204
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     try:
         # Get token from Authorization header
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith('Bearer '):
             return jsonify({"error": "No token provided"}), 401
+<<<<<<< HEAD
 
         token = auth_header.split(' ')[1]
         user_response = supabase.auth.get_user(token)
@@ -238,6 +321,17 @@ def get_user():
             "role": role # Include the role
         }), 200
 
+=======
+        
+        token = auth_header.split(' ')[1]
+        user = supabase.auth.get_user(token)
+        
+        return jsonify({
+            "id": user.user.id,
+            "email": user.user.email
+        }), 200
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     except Exception as e:
         print(f"Error obteniendo usuario: {e}")
         return jsonify({"error": "Token inválido"}), 401
@@ -246,6 +340,7 @@ def get_user():
 def refresh():
     if request.method == 'OPTIONS':
         return '', 204
+<<<<<<< HEAD
 
     try:
         data = request.get_json()
@@ -274,6 +369,23 @@ def refresh():
         # Be more specific if possible based on Supabase client errors
         return jsonify({"error": "Failed to refresh token: " + str(e)}), 401
 
+=======
+    
+    try:
+        data = request.get_json()
+        refresh_token = data.get('refresh_token')
+        
+        response = supabase.auth.refresh_session(refresh_token)
+        
+        return jsonify({
+            "access_token": response.session.access_token,
+            "refresh_token": response.session.refresh_token
+        }), 200
+        
+    except Exception as e:
+        print(f"Error en refresh: {e}")
+        return jsonify({"error": str(e)}), 401
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
 
 # --- Endpoint de Catálogos ---
 @app.route('/api/catalogos', methods=['GET'])
@@ -283,6 +395,7 @@ def get_catalogos():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
+<<<<<<< HEAD
 
         tablas_catalogo = [
             'agentes', 'agentes_externos', 'ciudades', 'estados',
@@ -301,6 +414,25 @@ def get_catalogos():
         cursor.close()
         return jsonify(catalogos)
 
+=======
+        
+        tablas_catalogo = [
+            'agentes', 'agentes_externos', 'ciudades', 'estados', 
+            'estados_fisicos', 'estados_publicacion', 'frecuencias_alquiler',
+            'monedas', 'tipos_negocio', 'tipos_propiedad', 'zonas'
+        ]
+        
+        for tabla in tablas_catalogo:
+            cursor.execute(f"SELECT id, nombre FROM public.{tabla} ORDER BY nombre ASC;")
+            catalogos[tabla] = cursor.fetchall()
+            
+        cursor.execute("SELECT id, nombre, email, telefono FROM public.agentes ORDER BY nombre ASC;")
+        catalogos['agentes'] = cursor.fetchall()
+
+        cursor.close()
+        return jsonify(catalogos)
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
@@ -313,6 +445,7 @@ def get_catalogos():
 def get_properties():
     conn = None
     try:
+<<<<<<< HEAD
         # --- INICIO DE CAMBIOS ---
         # 1. Obtener parámetros de filtro de la URL
         tipo_negocio_id = request.args.get('tipo_negocio_id')
@@ -324,6 +457,14 @@ def get_properties():
         # 2. Construir la consulta base (sin cambios)
         query = """
             SELECT p.*,
+=======
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        # Obtener propiedades con sus imágenes
+        query = """
+            SELECT p.*, 
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
                    json_agg(
                        json_build_object(
                            'id', pi.id,
@@ -335,6 +476,7 @@ def get_properties():
                    ) FILTER (WHERE pi.id IS NOT NULL) as imagenes
             FROM propiedades p
             LEFT JOIN propiedades_imagenes pi ON p.id = pi.propiedad_id
+<<<<<<< HEAD
         """
 
         # 3. Preparar filtros y parámetros
@@ -377,6 +519,13 @@ def get_properties():
 
         # Ejecutar la consulta con los parámetros (importante pasar params como tupla)
         cursor.execute(query, tuple(params))
+=======
+            WHERE p.deleted_at IS NULL
+            GROUP BY p.id
+            ORDER BY p.id DESC;
+        """
+        cursor.execute(query)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         propiedades = cursor.fetchall()
         cursor.close()
         return jsonify({"properties": propiedades})
@@ -393,10 +542,17 @@ def get_property(id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
+<<<<<<< HEAD
 
         # Obtener propiedad específica con sus imágenes
         query = """
             SELECT p.*,
+=======
+        
+        # Obtener propiedad específica con sus imágenes
+        query = """
+            SELECT p.*, 
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
                    json_agg(
                        json_build_object(
                            'id', pi.id,
@@ -414,7 +570,11 @@ def get_property(id):
         cursor.execute(query, (id,))
         propiedad = cursor.fetchone()
         cursor.close()
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         if propiedad:
             return jsonify(propiedad)
         else:
@@ -428,6 +588,7 @@ def get_property(id):
 
 @app.route('/api/propiedades', methods=['POST'])
 def add_property():
+<<<<<<< HEAD
     # ADD ROLE CHECK HERE if needed (e.g., only agents or admins can add)
     # try:
     #     requesting_user_id = get_user_id_from_token(request)
@@ -436,11 +597,14 @@ def add_property():
     # except Exception as auth_e:
     #      return jsonify({"error": str(auth_e)}), 401
 
+=======
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     data = request.json
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+<<<<<<< HEAD
 
         query = """
             INSERT INTO propiedades (
@@ -460,6 +624,27 @@ def add_property():
             ) RETURNING id;
         """
 
+=======
+        
+        query = """
+            INSERT INTO propiedades (
+                titulo, descripcion, precio, precio_alquiler, valor_administracion, 
+                habitaciones, alcobas, banos, banos_medios, estacionamientos, 
+                anio_construccion, piso, m2_terreno, m2_construccion, m2_privada, 
+                direccion, codigo_postal, lat, lng, registro_publico, 
+                convenio_url, convenio_validado,
+                tipo_negocio_id, tipo_propiedad_id, estado_publicacion_id, 
+                captado_por_agente_id, moneda_id, frecuencia_alquiler_id, 
+                estado_fisico_id, estado_id, ciudad_id, zona_id, agente_id, 
+                agente_externo_id, validado_por_usuario_id
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                %s, %s, %s, %s, %s
+            ) RETURNING id;
+        """
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         cursor.execute(query, (
             data.get('titulo'), data.get('descripcion'), data.get('precio'), data.get('precio_alquiler'), data.get('valor_administracion'),
             data.get('habitaciones', 0), data.get('alcobas', 0), data.get('banos', 0), data.get('banos_medios', 0), data.get('estacionamientos', 0),
@@ -471,15 +656,25 @@ def add_property():
             data.get('estado_fisico_id'), data.get('estado_id'), data.get('ciudad_id'), data.get('zona_id'), data.get('agente_id'),
             data.get('agente_externo_id'), data.get('validado_por_usuario_id')
         ))
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         new_id = cursor.fetchone()[0]
         conn.commit()
         cursor.close()
         return jsonify({"status": "success", "id": new_id}), 201
+<<<<<<< HEAD
 
     except Exception as e:
         print(e)
         if conn: conn.rollback()
+=======
+        
+    except Exception as e:
+        print(e)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
@@ -487,12 +682,16 @@ def add_property():
 
 @app.route('/api/propiedades/<int:id>', methods=['PUT'])
 def update_property(id):
+<<<<<<< HEAD
     # ADD ROLE CHECK HERE
+=======
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     data = request.json
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+<<<<<<< HEAD
 
         query = """
             UPDATE propiedades SET
@@ -505,10 +704,25 @@ def update_property(id):
                 tipo_negocio_id = %s, tipo_propiedad_id = %s, estado_publicacion_id = %s,
                 captado_por_agente_id = %s, moneda_id = %s, frecuencia_alquiler_id = %s,
                 estado_fisico_id = %s, estado_id = %s, ciudad_id = %s, zona_id = %s,
+=======
+        
+        query = """
+            UPDATE propiedades SET
+                titulo = %s, descripcion = %s, precio = %s, precio_alquiler = %s, 
+                valor_administracion = %s, habitaciones = %s, alcobas = %s, banos = %s, 
+                banos_medios = %s, estacionamientos = %s, anio_construccion = %s, piso = %s, 
+                m2_terreno = %s, m2_construccion = %s, m2_privada = %s, direccion = %s, 
+                codigo_postal = %s, lat = %s, lng = %s, registro_publico = %s, 
+                convenio_url = %s, convenio_validado = %s,
+                tipo_negocio_id = %s, tipo_propiedad_id = %s, estado_publicacion_id = %s, 
+                captado_por_agente_id = %s, moneda_id = %s, frecuencia_alquiler_id = %s, 
+                estado_fisico_id = %s, estado_id = %s, ciudad_id = %s, zona_id = %s, 
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
                 agente_id = %s, agente_externo_id = %s, validado_por_usuario_id = %s,
                 updated_at = NOW()
             WHERE id = %s;
         """
+<<<<<<< HEAD
 
         cursor.execute(query, (
             data.get('titulo'), data.get('descripcion'), data.get('precio'), data.get('precio_alquiler'),
@@ -533,6 +747,29 @@ def update_property(id):
     except Exception as e:
         print(e)
         if conn: conn.rollback()
+=======
+        
+        cursor.execute(query, (
+            data.get('titulo'), data.get('descripcion'), data.get('precio'), data.get('precio_alquiler'), 
+            data.get('valor_administracion'), data.get('habitaciones'), data.get('alcobas'), data.get('banos'), 
+            data.get('banos_medios'), data.get('estacionamientos'), data.get('anio_construccion'), data.get('piso'), 
+            data.get('m2_terreno'), data.get('m2_construccion'), data.get('m2_privada'), data.get('direccion'), 
+            data.get('codigo_ postal'), data.get('lat'), data.get('lng'), data.get('registro_publico'), 
+            data.get('convenio_url'), data.get('convenio_validado'),
+            data.get('tipo_negocio_id'), data.get('tipo_propiedad_id'), data.get('estado_publicacion_id'), 
+            data.get('captado_por_agente_id'), data.get('moneda_id'), data.get('frecuencia_alquiler_id'), 
+            data.get('estado_fisico_id'), data.get('estado_id'), data.get('ciudad_id'), data.get('zona_id'), 
+            data.get('agente_id'), data.get('agente_externo_id'), data.get('validado_por_usuario_id'),
+            id
+        ))
+        
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "success"})
+        
+    except Exception as e:
+        print(e)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
@@ -540,12 +777,16 @@ def update_property(id):
 
 @app.route('/api/propiedades/<int:id>', methods=['DELETE'])
 def delete_property(id):
+<<<<<<< HEAD
     # ADD ROLE CHECK HERE
+=======
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("UPDATE propiedades SET deleted_at = NOW() WHERE id = %s;", (id,))
+<<<<<<< HEAD
         deleted_rows = cursor.rowcount
         conn.commit()
         cursor.close()
@@ -555,15 +796,55 @@ def delete_property(id):
     except Exception as e:
         print(e)
         if conn: conn.rollback()
+=======
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "deleted (soft)"})
+    except Exception as e:
+        print(e)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
+<<<<<<< HEAD
+=======
+# --- ESTA ES LA RUTA NUEVA QUE AÑADÍ ---
+@app.route('/api/propiedades/<int:id>/view', methods=['POST'])
+def increment_view(id):
+    conn = None
+    try:
+        conn = get_db_connection() 
+        cur = conn.cursor()
+        
+        # --- ESTA ES LA LÍNEA CORREGIDA ---
+        # Usa 'visitas' (con 'i') en lugar de 'vistas' (con 's')
+        cur.execute(
+            "UPDATE propiedades SET visitas = COALESCE(visitas, 0) + 1 WHERE id = %s", 
+            (id,)
+        )
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({'message': f'Visitas incrementadas para propiedad {id}'}), 200
+    
+    except Exception as e:
+        # Imprime el error en tu terminal de backend para depuración
+        print(f"Error incrementando vistas: {e}") 
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
+# --- FIN DE LA RUTA AÑADIDA ---
+
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
 # --- Endpoints de Imágenes ---
 @app.route('/api/propiedades/<int:propiedad_id>/imagenes', methods=['POST'])
 def upload_image(propiedad_id):
     """Subir una imagen a Supabase Storage y guardar referencia en BD"""
+<<<<<<< HEAD
     # ADD ROLE CHECK HERE
 
     if 'file' not in request.files:
@@ -578,22 +859,44 @@ def upload_image(propiedad_id):
     if not allowed_file(file.filename):
         return jsonify({"error": "File type not allowed"}), 400
 
+=======
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    
+    file = request.files['file']
+    es_principal = request.form.get('es_principal', 'false').lower() == 'true'
+    
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({"error": "File type not allowed"}), 400
+    
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     conn = None
     try:
         # Generar nombre único para el archivo
         file_extension = file.filename.rsplit('.', 1)[1].lower()
         unique_filename = f"{propiedad_id}_{uuid.uuid4().hex}.{file_extension}"
         file_path = f"propiedades/{unique_filename}"
+<<<<<<< HEAD
 
         # Leer el archivo
         file_content = file.read()
 
+=======
+        
+        # Leer el archivo
+        file_content = file.read()
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Subir a Supabase Storage
         supabase.storage.from_(BUCKET_NAME).upload(
             file_path,
             file_content,
             file_options={"content-type": file.content_type}
         )
+<<<<<<< HEAD
 
         # Obtener URL pública
         public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(file_path)
@@ -602,20 +905,38 @@ def upload_image(propiedad_id):
         conn = get_db_connection()
         cursor = conn.cursor()
 
+=======
+        
+        # Obtener URL pública
+        public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(file_path)
+        
+        # Guardar referencia en la base de datos
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Si es principal, desmarcar otras imágenes como principal
         if es_principal:
             cursor.execute(
                 "UPDATE propiedades_imagenes SET es_principal = FALSE WHERE propiedad_id = %s;",
                 (propiedad_id,)
             )
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Obtener el siguiente orden
         cursor.execute(
             "SELECT COALESCE(MAX(orden), -1) + 1 FROM propiedades_imagenes WHERE propiedad_id = %s;",
             (propiedad_id,)
         )
         orden = cursor.fetchone()[0]
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Insertar registro de imagen
         cursor.execute(
             """
@@ -625,15 +946,24 @@ def upload_image(propiedad_id):
             """,
             (propiedad_id, public_url, unique_filename, es_principal, orden)
         )
+<<<<<<< HEAD
 
         image_id = cursor.fetchone()[0]
         conn.commit()
         cursor.close()
 
+=======
+        
+        image_id = cursor.fetchone()[0]
+        conn.commit()
+        cursor.close()
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({
             "status": "success",
             "id": image_id,
             "url": public_url,
+<<<<<<< HEAD
             "nombre_archivo": unique_filename,
             "es_principal": es_principal,
             "orden": orden
@@ -643,6 +973,13 @@ def upload_image(propiedad_id):
         print(e)
         if conn: conn.rollback()
         # Consider deleting from storage if DB insert fails
+=======
+            "nombre_archivo": unique_filename
+        }), 201
+        
+    except Exception as e:
+        print(e)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
@@ -651,18 +988,26 @@ def upload_image(propiedad_id):
 @app.route('/api/propiedades/<int:propiedad_id>/imagenes/<int:imagen_id>', methods=['DELETE'])
 def delete_image(propiedad_id, imagen_id):
     """Eliminar imagen de Supabase Storage y BD"""
+<<<<<<< HEAD
     # ADD ROLE CHECK HERE
+=======
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Obtener información de la imagen
         cursor.execute(
             "SELECT nombre_archivo FROM propiedades_imagenes WHERE id = %s AND propiedad_id = %s;",
             (imagen_id, propiedad_id)
         )
         imagen = cursor.fetchone()
+<<<<<<< HEAD
 
         if not imagen:
             cursor.close()
@@ -677,11 +1022,22 @@ def delete_image(propiedad_id, imagen_id):
             print(f"Error deleting from storage (continuing): {storage_e}")
 
 
+=======
+        
+        if not imagen:
+            return jsonify({"error": "Imagen no encontrada"}), 404
+        
+        # Eliminar de Supabase Storage
+        file_path = f"propiedades/{imagen['nombre_archivo']}"
+        supabase.storage.from_(BUCKET_NAME).remove([file_path])
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Eliminar de la base de datos
         cursor.execute(
             "DELETE FROM propiedades_imagenes WHERE id = %s;",
             (imagen_id,)
         )
+<<<<<<< HEAD
         deleted_rows = cursor.rowcount
         conn.commit()
         cursor.close()
@@ -695,6 +1051,15 @@ def delete_image(propiedad_id, imagen_id):
     except Exception as e:
         print(e)
         if conn: conn.rollback()
+=======
+        
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "deleted"})
+        
+    except Exception as e:
+        print(e)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
@@ -703,24 +1068,37 @@ def delete_image(propiedad_id, imagen_id):
 @app.route('/api/propiedades/<int:propiedad_id>/imagenes/<int:imagen_id>/principal', methods=['PUT'])
 def set_principal_image(propiedad_id, imagen_id):
     """Marcar una imagen como principal"""
+<<<<<<< HEAD
     # ADD ROLE CHECK HERE
+=======
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+<<<<<<< HEAD
 
         # Use a transaction
         # Desmarcar todas las imágenes como principal for this property
+=======
+        
+        # Desmarcar todas las imágenes como principal
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         cursor.execute(
             "UPDATE propiedades_imagenes SET es_principal = FALSE WHERE propiedad_id = %s;",
             (propiedad_id,)
         )
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         # Marcar la imagen especificada como principal
         cursor.execute(
             "UPDATE propiedades_imagenes SET es_principal = TRUE WHERE id = %s AND propiedad_id = %s;",
             (imagen_id, propiedad_id)
         )
+<<<<<<< HEAD
         updated_rows = cursor.rowcount
 
         conn.commit()
@@ -732,11 +1110,21 @@ def set_principal_image(propiedad_id, imagen_id):
     except Exception as e:
         print(e)
         if conn: conn.rollback()
+=======
+        
+        conn.commit()
+        cursor.close()
+        return jsonify({"status": "success"})
+        
+    except Exception as e:
+        print(e)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
         return jsonify({"error": str(e)}), 500
     finally:
         if conn:
             conn.close()
 
+<<<<<<< HEAD
 
 # --- START: User Management Endpoints (Admin Only) ---
 
@@ -1117,3 +1505,7 @@ if __name__ == '__main__':
     # Consider using a more production-ready server like Gunicorn/Waitress
     # and disabling debug mode for production
     app.run(debug=True, host='0.0.0.0') # Listen on all interfaces if running in Docker/cloud
+=======
+if __name__ == '__main__':
+    app.run(debug=True)
+>>>>>>> 469e299b5f9f2e26f511229791091219153c24c2
