@@ -1,4 +1,4 @@
 export const environment = {
-  production: false,
-  API_URL: 'http://localhost:3000/api'  // o tu dominio en producción
+  production: true,
+  API_URL: 'https://casita-azul-backend.onrender.com/api'
 };
