@@ -19,7 +19,7 @@ export interface SearchParams {
 export class PropertyService {
   private http = inject(HttpClient);
   // Asegúrate que esta URL apunte a tu backend de casita-azul-app
-  private base = 'http://localhost:5000/api/propiedades';
+  private base = 'https://casita-azul-app.onrender.com/api/propiedades';
 
   // IDs de tipos de negocio
   private ID_TIPO_VENTA = '1';
