@@ -35,7 +35,7 @@ export interface Catalogos {
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
   private http = inject(HttpClient);
-  private baseUrl = 'https://casita-azul-app.onrender.com/api/propiedades';
+  private baseUrl = 'https://casita-azul-app.onrender.com/api';
 
   /**
    * Obtiene todos los catálogos del backend
